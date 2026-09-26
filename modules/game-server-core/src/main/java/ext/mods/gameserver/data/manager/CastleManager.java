@@ -18,9 +18,6 @@
 package ext.mods.gameserver.data.manager;
 
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,8 +25,9 @@ import java.util.Map;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.data.xml.IXmlReader;
-import ext.mods.commons.pool.ConnectionPool;
 
+import ext.mods.gameserver.data.adapter.JdbcCastleStore;
+import ext.mods.gameserver.data.repository.CastleStore;
 import ext.mods.gameserver.data.sql.ClanTable;
 import ext.mods.gameserver.enums.CabalType;
 import ext.mods.gameserver.enums.SpawnType;
@@ -53,77 +51,53 @@ import org.w3c.dom.NamedNodeMap;
  */
 public final class CastleManager implements IXmlReader
 {
-	private static final String LOAD_CASTLES = "SELECT * FROM castle ORDER BY id";
-	private static final String LOAD_OWNER = "SELECT clan_id FROM clan_data WHERE hasCastle=?";
-	private static final String LOAD_TRAPS = "SELECT * FROM castle_trapupgrade WHERE castleId=?";
-	private static final String LOAD_DOORS = "SELECT * FROM castle_doorupgrade WHERE castleId=?";
-	
-	private static final String RESET_CERTIFICATES = "UPDATE castle SET certificates=300";
-	
 	private final Map<Integer, Castle> _castles = new HashMap<>();
+	private final CastleStore _store;
 	
 	protected CastleManager()
 	{
+		this(new JdbcCastleStore());
+	}
+
+	CastleManager(CastleStore store)
+	{
+		_store = store;
 		load();
 		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(LOAD_CASTLES);
-			ResultSet rs = ps.executeQuery())
+		try
 		{
-			while (rs.next())
+			for (CastleStore.CastleRecord record : _store.loadCastles())
 			{
-				final Castle castle = _castles.get(rs.getInt("id"));
+				final Castle castle = _castles.get(record.id());
 				if (castle == null)
 					continue;
-				
+
 				castle.setSiegeDate(Calendar.getInstance());
-				castle.getSiegeDate().setTimeInMillis(rs.getLong("siegeDate"));
-				castle.setTimeRegistrationOver(rs.getBoolean("regTimeOver"));
-				castle.setCurrentTaxPercent(rs.getInt("currentTaxPercent"), false);
-				castle.setNextTaxPercent(rs.getInt("nextTaxPercent"), false);
-				castle.setTreasury(rs.getLong("treasury"));
-				castle.setTaxRevenue(rs.getLong("taxRevenue"));
-				castle.setSeedIncome(rs.getLong("seedIncome"));
-				castle.setLeftCertificates(rs.getInt("certificates"), false);
-				
-				try (PreparedStatement ps1 = con.prepareStatement(LOAD_OWNER);
-					PreparedStatement ps2 = con.prepareStatement(LOAD_TRAPS);
-					PreparedStatement ps3 = con.prepareStatement(LOAD_DOORS))
+				castle.getSiegeDate().setTimeInMillis(record.siegeDate());
+				castle.setTimeRegistrationOver(record.registrationOver());
+				castle.setCurrentTaxPercent(record.currentTaxPercent(), false);
+				castle.setNextTaxPercent(record.nextTaxPercent(), false);
+				castle.setTreasury(record.treasury());
+				castle.setTaxRevenue(record.taxRevenue());
+				castle.setSeedIncome(record.seedIncome());
+				castle.setLeftCertificates(record.certificates(), false);
+
+				for (int ownerId : _store.loadOwnerClanIds(castle.getId()))
 				{
-					ps1.setInt(1, castle.getId());
-					
-					try (ResultSet rs1 = ps1.executeQuery())
+					if (ownerId > 0)
 					{
-						while (rs1.next())
-						{
-							final int ownerId = rs1.getInt("clan_id");
-							if (ownerId > 0)
-							{
-								final Clan clan = ClanTable.getInstance().getClan(ownerId);
-								if (clan != null)
-									castle.setOwnerId(ownerId);
-							}
-						}
-					}
-					
-					ps2.setInt(1, castle.getId());
-					
-					try (ResultSet rs2 = ps2.executeQuery())
-					{
-						while (rs2.next())
-							castle.getControlTowers().get(rs2.getInt("towerIndex")).setUpgradeLevel(rs2.getInt("level"));
-					}
-					
-					castle.launchSiege();
-					
-					ps3.setInt(1, castle.getId());
-					
-					try (ResultSet rs3 = ps3.executeQuery())
-					{
-						while (rs3.next())
-							castle.upgradeDoor(rs3.getInt("doorId"), rs3.getInt("hp"), false);
+						final Clan clan = ClanTable.getInstance().getClan(ownerId);
+						if (clan != null)
+							castle.setOwnerId(ownerId);
 					}
 				}
+				for (CastleStore.UpgradeRecord upgrade : _store.loadTrapUpgrades(castle.getId()))
+					castle.getControlTowers().get(upgrade.id()).setUpgradeLevel(upgrade.level());
+
+				castle.launchSiege();
+
+				for (CastleStore.UpgradeRecord upgrade : _store.loadDoorUpgrades(castle.getId()))
+					castle.upgradeDoor(upgrade.id(), upgrade.level(), false);
 			}
 		}
 		catch (Exception e)
@@ -329,15 +303,7 @@ public final class CastleManager implements IXmlReader
 		for (Castle castle : _castles.values())
 			castle.setLeftCertificates(300, false);
 		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(RESET_CERTIFICATES))
-		{
-			ps.executeUpdate();
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Failed to reset certificates.", e);
-		}
+		_store.resetCertificates();
 	}
 	
 	public void spawnEntities()
