@@ -17,28 +17,25 @@
  */
 package ext.mods.gameserver.model.olympiad;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.commons.data.StatSet;
-import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
-import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
-import ext.mods.Config;
 import ext.mods.gameserver.data.manager.AntiFeedManager;
 import ext.mods.gameserver.data.manager.HeroManager;
 import ext.mods.gameserver.data.manager.ZoneManager;
+import ext.mods.gameserver.data.adapter.JdbcOlympiadStore;
+import ext.mods.gameserver.data.repository.OlympiadStore;
 import ext.mods.gameserver.enums.OlympiadState;
 import ext.mods.gameserver.enums.OlympiadType;
 import ext.mods.gameserver.model.World;
@@ -55,20 +52,8 @@ public class Olympiad
 	protected static final CLogger LOGGER = new CLogger(Olympiad.class.getName());
 	
 	private final Map<Integer, StatSet> _nobles = new ConcurrentHashMap<>();
+	private final OlympiadStore _store;
 	private final Map<Integer, Integer> _rankRewards = new HashMap<>();
-	
-	private static final String SELECT_OLYMPIAD_DATA = "SELECT current_cycle, period, olympiad_end, validation_end, next_weekly_change FROM olympiad_data WHERE id = 0";
-	
-	private static final String SELECT_OLYMPIAD_NOBLES = "SELECT olympiad_nobles.char_id, olympiad_nobles.class_id, characters.char_name, olympiad_nobles.olympiad_points, olympiad_nobles.competitions_done, olympiad_nobles.competitions_won, olympiad_nobles.competitions_lost, olympiad_nobles.competitions_drawn FROM olympiad_nobles, characters WHERE characters.obj_Id = olympiad_nobles.char_id";
-	private static final String TRUNCATE_OLYMPIAD_NOBLES = "TRUNCATE olympiad_nobles";
-	
-	private static final String SELECT_CLASSIFIED_NOBLES = "SELECT char_id from olympiad_nobles_eom WHERE competitions_done >= ? ORDER BY olympiad_points DESC, competitions_done DESC, competitions_won DESC";
-	private static final String SELECT_CLASS_LEADER = "SELECT characters.char_name from olympiad_nobles_eom, characters WHERE characters.obj_Id = olympiad_nobles_eom.char_id AND olympiad_nobles_eom.class_id = ? AND olympiad_nobles_eom.competitions_done >= ? ORDER BY olympiad_nobles_eom.olympiad_points DESC, olympiad_nobles_eom.competitions_done DESC, olympiad_nobles_eom.competitions_won DESC LIMIT 10";
-	private static final String SELECT_CLASS_LEADER_CURRENT = "SELECT characters.char_name from olympiad_nobles, characters " + "WHERE characters.obj_Id = olympiad_nobles.char_id AND olympiad_nobles.class_id = ? " + "AND olympiad_nobles.competitions_done >= 3 " + "ORDER BY olympiad_nobles.olympiad_points DESC, olympiad_nobles.competitions_done DESC LIMIT 10";
-	
-	private static final String SELECT_MONTH_OLYMPIAD_POINTS = "SELECT olympiad_points FROM olympiad_nobles_eom WHERE char_id = ?";
-	private static final String INSERT_MONTH_OLYMPIAD = "INSERT INTO olympiad_nobles_eom SELECT char_id, class_id, olympiad_points, competitions_done, competitions_won, competitions_lost, competitions_drawn FROM olympiad_nobles";
-	private static final String TRUNCATE_MONTH_OLYMPIAD = "TRUNCATE olympiad_nobles_eom";
 	
 	public static final String OLYMPIAD_HTML_PATH = "html/olympiad/";
 	
@@ -101,6 +86,12 @@ public class Olympiad
 	
 	protected Olympiad()
 	{
+		this(new JdbcOlympiadStore());
+	}
+
+	Olympiad(OlympiadStore store)
+	{
+		_store = store;
 		if (ConfigEvents.OLY_ENABLED)
 		{
 			load();
@@ -179,17 +170,17 @@ public class Olympiad
 		_validationEnd = 0;
 		_nextWeeklyChange = 0;
 		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(SELECT_OLYMPIAD_DATA);
-			ResultSet rs = ps.executeQuery())
+		try
 		{
-			if (rs.next())
+			final Optional<OlympiadStore.OlympiadStatus> status = _store.loadStatus();
+			if (status.isPresent())
 			{
-				_currentCycle = rs.getInt("current_cycle");
-				_period = parseOlympiadState(rs.getString("period"));
-				_olympiadEnd = rs.getLong("olympiad_end");
-				_validationEnd = rs.getLong("validation_end");
-				_nextWeeklyChange = rs.getLong("next_weekly_change");
+				final OlympiadStore.OlympiadStatus data = status.get();
+				_currentCycle = data.currentCycle();
+				_period = parseOlympiadState(data.period());
+				_olympiadEnd = data.olympiadEnd();
+				_validationEnd = data.validationEnd();
+				_nextWeeklyChange = data.nextWeeklyChange();
 			}
 			else
 			{
@@ -233,22 +224,20 @@ public class Olympiad
 				break;
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(SELECT_OLYMPIAD_NOBLES);
-			ResultSet rset = ps.executeQuery())
+		try
 		{
-			while (rset.next())
+			for (OlympiadStore.NobleRecord noble : _store.loadNobles())
 			{
 				final StatSet set = new StatSet();
-				set.set(CLASS_ID, rset.getInt(CLASS_ID));
-				set.set(CHAR_NAME, rset.getString(CHAR_NAME));
-				set.set(POINTS, rset.getInt(POINTS));
-				set.set(COMP_DONE, rset.getInt(COMP_DONE));
-				set.set(COMP_WON, rset.getInt(COMP_WON));
-				set.set(COMP_LOST, rset.getInt(COMP_LOST));
-				set.set(COMP_DRAWN, rset.getInt(COMP_DRAWN));
+				set.set(CLASS_ID, noble.classId());
+				set.set(CHAR_NAME, noble.charName());
+				set.set(POINTS, noble.points());
+				set.set(COMP_DONE, noble.competitionsDone());
+				set.set(COMP_WON, noble.competitionsWon());
+				set.set(COMP_LOST, noble.competitionsLost());
+				set.set(COMP_DRAWN, noble.competitionsDrawn());
 				
-				addNobleStats(rset.getInt(CHAR_ID), set);
+				addNobleStats(noble.charId(), set);
 			}
 		}
 		catch (Exception e)
@@ -285,16 +274,12 @@ public class Olympiad
 		
 		final Map<Integer, Integer> temporaryRanks = new HashMap<>();
 		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(SELECT_CLASSIFIED_NOBLES))
+		try
 		{
-			ps.setInt(1, ConfigEvents.OLY_MIN_MATCHES);
-			
-			try (ResultSet rs = ps.executeQuery())
+			int place = 1;
+			for (int objectId : _store.loadRankedNobleIds(ConfigEvents.OLY_MIN_MATCHES))
 			{
-				int place = 1;
-				while (rs.next())
-					temporaryRanks.put(rs.getInt(CHAR_ID), place++);
+				temporaryRanks.put(objectId, place++);
 			}
 		}
 		catch (Exception e)
@@ -604,31 +589,15 @@ public class Olympiad
 	{
 		if (_nobles.isEmpty())
 			return;
-		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("olympiad_nobles", "char_id,class_id,olympiad_points,competitions_done,competitions_won,competitions_lost,competitions_drawn", "?,?,?,?,?,?,?", "char_id", "class_id,olympiad_points,competitions_done,competitions_won,competitions_lost,competitions_drawn")))
+
+		final List<OlympiadStore.NobleRecord> nobles = new ArrayList<>();
+		for (Map.Entry<Integer, StatSet> noble : _nobles.entrySet())
 		{
-			for (Map.Entry<Integer, StatSet> noble : _nobles.entrySet())
-			{
-				final StatSet set = noble.getValue();
-				if (set == null)
-					continue;
-				
-				ps.setInt(1, noble.getKey());
-				ps.setInt(2, set.getInteger(CLASS_ID));
-				ps.setInt(3, set.getInteger(POINTS));
-				ps.setInt(4, set.getInteger(COMP_DONE));
-				ps.setInt(5, set.getInteger(COMP_WON));
-				ps.setInt(6, set.getInteger(COMP_LOST));
-				ps.setInt(7, set.getInteger(COMP_DRAWN));
-				ps.addBatch();
-			}
-			ps.executeBatch();
+			final StatSet set = noble.getValue();
+			if (set != null)
+				nobles.add(new OlympiadStore.NobleRecord(noble.getKey(), set.getInteger(CLASS_ID), set.getString(CHAR_NAME), set.getInteger(POINTS), set.getInteger(COMP_DONE), set.getInteger(COMP_WON), set.getInteger(COMP_LOST), set.getInteger(COMP_DRAWN)));
 		}
-		catch (Exception e)
-		{
-			LOGGER.error("Couldn't save Olympiad nobles data.", e);
-		}
+		_store.saveNobles(nobles);
 	}
 	
 	/**
@@ -637,44 +606,12 @@ public class Olympiad
 	public void saveOlympiadStatus()
 	{
 		saveNobleData();
-		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("olympiad_data", "id,current_cycle,period,olympiad_end,validation_end,next_weekly_change", "0,?,?,?,?,?", "id", "current_cycle,period,olympiad_end,validation_end,next_weekly_change")))
-		{
-			ps.setInt(1, _currentCycle);
-			ps.setString(2, _period.toString());
-			ps.setLong(3, _olympiadEnd);
-			ps.setLong(4, _validationEnd);
-			ps.setLong(5, _nextWeeklyChange);
-			ps.execute();
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Couldn't save Olympiad status.", e);
-		}
+		_store.saveStatus(new OlympiadStore.OlympiadStatus(_currentCycle, _period.toString(), _olympiadEnd, _validationEnd, _nextWeeklyChange));
 	}
 	
 	public List<String> getClassLeaderBoard(int classId)
 	{
-		final List<String> names = new ArrayList<>();
-		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(ConfigEvents.OLY_SHOW_MONTHLY_WINNERS ? SELECT_CLASS_LEADER : SELECT_CLASS_LEADER_CURRENT))
-		{
-			ps.setInt(1, classId);
-			ps.setInt(2, ConfigEvents.OLY_MIN_MATCHES);
-			
-			try (ResultSet rs = ps.executeQuery())
-			{
-				while (rs.next())
-					names.add(rs.getString(CHAR_NAME));
-			}
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Couldn't load Olympiad leaders.", e);
-		}
-		return names;
+		return _store.loadClassLeaders(classId, ConfigEvents.OLY_MIN_MATCHES, ConfigEvents.OLY_SHOW_MONTHLY_WINNERS);
 	}
 	
 	public int getNoblessePasses(Player player, boolean clear)
@@ -719,37 +656,12 @@ public class Olympiad
 	
 	public int getLastNobleOlympiadPoints(int objId)
 	{
-		int result = 0;
-		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(SELECT_MONTH_OLYMPIAD_POINTS))
-		{
-			ps.setInt(1, objId);
-			
-			try (ResultSet rs = ps.executeQuery())
-			{
-				if (rs.next())
-					result = rs.getInt("olympiad_points");
-			}
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Couldn't load last Olympiad points.", e);
-		}
-		return result;
+		return _store.loadLastNoblePoints(objId);
 	}
 	
 	protected void deleteNobles()
 	{
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(TRUNCATE_OLYMPIAD_NOBLES))
-		{
-			ps.execute();
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Couldn't delete Olympiad nobles.", e);
-		}
+		_store.deleteNobles();
 		_nobles.clear();
 	}
 	
@@ -769,17 +681,7 @@ public class Olympiad
 		
 		saveOlympiadStatus();
 		
-		try (Connection con = ConnectionPool.getConnection();
-			PreparedStatement ps = con.prepareStatement(TRUNCATE_MONTH_OLYMPIAD);
-			PreparedStatement ps2 = con.prepareStatement(INSERT_MONTH_OLYMPIAD))
-		{
-			ps.execute();
-			ps2.execute();
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Couldn't update monthly Olympiad nobles.", e);
-		}
+		_store.archiveNobles();
 		
 		processRankRewards();
 		
