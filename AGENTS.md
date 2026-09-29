@@ -78,7 +78,7 @@ As seguintes regras valem para mudanças de arquitetura:
 
 ## Estado do roadmap
 
-Atualizado em 2026-09-28:
+Atualizado em 2026-09-29:
 
 - O problema de login e seleção de personagens observado após a atualização da infraestrutura foi considerado resolvido; o stack PostgreSQL, LoginServer e GameServer está operacional após a reinicialização do ambiente.
 - A Fase 1 (documentação, proteção e compatibilidade), a Fase 2 (fluxos críticos) e a Fase 3 (sistemas secundários) foram concluídas e integradas na `main`.
@@ -86,6 +86,12 @@ Atualizado em 2026-09-28:
 - Após o merge desta etapa, a Fase 4 será considerada concluída. Não iniciar a Fase 5 antes de executar a Fase 4.1, salvo exceção registrada explicitamente.
 - A Fase 4.1 foi adicionada como etapa oficial para depois da Fase 4 e antes da Fase 5. Ela trata a normalização estrutural do repositório, sem reescrever o motor de pacotes ou o núcleo do jogo.
 - Depois da Fase 4.1, permanecem como trabalho estrutural a matriz automatizada PostgreSQL/MariaDB, testes de persistência mais amplos e o endurecimento do deployment para AWS/produção.
+
+O primeiro bloco da Fase 4.1 foi iniciado na branch `feature/44-structural-normalization`.
+O inventário e as dependências críticas estão documentados em
+[`docs/architecture/repository-inventory.md`](docs/architecture/repository-inventory.md).
+As movimentações e a remoção de artefatos gerados permanecem bloqueadas até que
+o pipeline reproduzível correspondente seja validado.
 
 ### Fase 4.1 — normalização estrutural do projeto
 
