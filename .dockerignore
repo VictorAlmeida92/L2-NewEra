@@ -8,6 +8,8 @@ build
 .idea
 .vscode
 *.log
+libs/server.jar
+libs/modules/
 game/log
 login/log
 logs
