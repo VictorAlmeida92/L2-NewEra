@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import ext.mods.commons.lang.StringUtil;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -259,7 +260,7 @@ public class Auction
 		
 		_duration = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_AUCTION_DURATION))
 		{
 			ps.setLong(1, _duration);
@@ -298,7 +299,7 @@ public class Auction
 		final ItemInstance item = player.addItem(_itemId, count, true);
 		item.setEnchantLevel(_itemEnchant, null);
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			final Player owner = World.getInstance().getPlayer(_objId);
 			if (owner == null)
@@ -378,7 +379,7 @@ public class Auction
 		if (player == null)
 			return;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_AUCTION))
 		{
 			ps.setInt(1, _id);
@@ -399,7 +400,7 @@ public class Auction
 	
 	public void store()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_AUCTION))
 		{
 			ps.setInt(1, _id);

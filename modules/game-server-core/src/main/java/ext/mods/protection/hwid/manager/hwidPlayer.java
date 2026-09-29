@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.network.GameClient;
 import ext.mods.protection.hwid.manager.hwidInfoList.LockType;
@@ -50,7 +51,7 @@ public class hwidPlayer
 	
 	private static void load()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement statement = con.prepareStatement("SELECT * FROM hwid_info");
 			ResultSet rset = statement.executeQuery())
 		{
@@ -114,7 +115,7 @@ public class hwidPlayer
 		_list.put(counterHwidInfo, hInfo);
 		if (isFound)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement statement = con.prepareStatement("UPDATE hwid_info SET Account=?,PlayerID=?,LockType=? WHERE HWID=?"))
 			{
 				statement.setString(1, client.getAccountName());
@@ -130,7 +131,7 @@ public class hwidPlayer
 		}
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement statement = con.prepareStatement("INSERT INTO hwid_info (HWID, Account, PlayerID, LockType) values (?,?,?,?)"))
 			{
 				statement.setString(1, client.getHWID());

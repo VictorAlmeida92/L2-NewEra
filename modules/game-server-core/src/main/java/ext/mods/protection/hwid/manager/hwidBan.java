@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.network.GameClient;
 
@@ -50,7 +51,7 @@ public class hwidBan
 	{
 		String HWID = "";
 		int counterHWIDBan = 0;
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement statement = con.prepareStatement("SELECT * FROM hwid_bans");
 			ResultSet rset = statement.executeQuery())
 		{
@@ -100,7 +101,7 @@ public class hwidBan
 		final hwidBanList hb = new hwidBanList(counterHwidBan);
 		hb.setHWIDBan(HWID);
 		_lists.put(counterHwidBan, hb);
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement statement = con.prepareStatement("INSERT INTO hwid_bans SET HWID=?"))
 		{
 			statement.setString(1, HWID);

@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -46,7 +47,7 @@ public class DelayedItemsManager implements Runnable
 	@Override
 	public void run()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(SELECT);
 				ResultSet rset = ps.executeQuery())
@@ -80,7 +81,7 @@ public class DelayedItemsManager implements Runnable
 	
 	private static void updateDonation(int objId, int id, long count, int enchant)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement statement = con.prepareStatement("DELETE FROM items_delayed WHERE owner_id=? AND item_id=? AND count=? AND enchant_level=?;"))
 		{
 			statement.setInt(1, objId);

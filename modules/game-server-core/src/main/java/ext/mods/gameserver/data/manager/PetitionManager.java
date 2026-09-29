@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.data.xml.AdminData;
@@ -59,7 +60,7 @@ public final class PetitionManager
 	
 	protected PetitionManager()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(SELECT_PETITIONS);
 				ResultSet rs = ps.executeQuery())
@@ -293,7 +294,7 @@ public final class PetitionManager
 	
 	public void store()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(TRUNCATE_PETITIONS))
 			{

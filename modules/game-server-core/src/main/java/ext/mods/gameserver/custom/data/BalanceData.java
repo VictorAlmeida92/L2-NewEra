@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.model.balance.BalanceGeneration;
@@ -45,7 +46,7 @@ public class BalanceData
 	{
 		_modifiers.clear();
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement("SELECT * FROM balance_classes");
 				ResultSet rs = ps.executeQuery())
@@ -72,7 +73,7 @@ public class BalanceData
 			System.out.println("Error loading balance modifiers: " + e);
 		}
 		
-		try (Connection con1 = ConnectionPool.getConnection())
+		try (Connection con1 = DatabaseConnection.open())
 		{
 			BalanceGeneration.generate(con1, _modifiers);
 		}
@@ -88,7 +89,7 @@ public class BalanceData
 	private void loadVulnerabilities()
 	{
 		_vulnModifiers.clear();
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("SELECT skill_type, multiplier FROM balance_vulnerability");
 			ResultSet rs = ps.executeQuery())
 		{
@@ -130,7 +131,7 @@ public class BalanceData
 	{
 		String sql = DatabaseDialect.upsert("balance_classes", "class_id_attacker, class_id_target, p_atk_mod, m_atk_mod, p_def_mod, m_def_mod", "?, ?, ?, ?, ?, ?", "class_id_attacker, class_id_target", "p_atk_mod, m_atk_mod, p_def_mod, m_def_mod");
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(sql))
 		{
 			ps.setInt(1, classAtk);
@@ -157,7 +158,7 @@ public class BalanceData
 	
 	public void saveVulnerability(String type, double multiplier)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("balance_vulnerability", "skill_type, multiplier", "?, ?", "skill_type", "multiplier")))
 		{
 			ps.setString(1, type);

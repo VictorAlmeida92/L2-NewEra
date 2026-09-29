@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.PixMod.donationmanager.purchase.Purchase;
@@ -54,7 +55,7 @@ public class DonationData
 	
 	public void restore()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_PURCHASES);
 			PreparedStatement ps2 = con.prepareStatement(LOAD_PAYMENTS))
 		{
@@ -114,7 +115,7 @@ public class DonationData
 	
 	public void delete(Purchase p, boolean purchase, boolean payment)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			if (purchase)
 			{
@@ -146,7 +147,7 @@ public class DonationData
 	
 	public void update(Purchase p)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_PURCHASE))
 		{
 			ps.setString(1, p.getPaymentId());
@@ -183,7 +184,7 @@ public class DonationData
 			DonationManager.getInstance().getWaitingPurchases().remove(p.getPlayerId());
 		}
 
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(NEW_PURCHASE))
 		{
 			ps.setInt(1, p.getId());

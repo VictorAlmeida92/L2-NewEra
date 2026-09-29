@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.util.LinTime;
 
@@ -196,7 +197,7 @@ public class FestivalOfDarknessManager
 	 */
 	protected void restoreFestivalData()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(RESTORE_FESTIVAL);
 				ResultSet rs = ps.executeQuery())
@@ -256,7 +257,7 @@ public class FestivalOfDarknessManager
 			"festivalId, cabal, cycle",
 			"date, score, members");
 
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(insertOrUpdateFestival))
 		{
 			for (Map<Integer, StatSet> map : _festivalData.values())
@@ -309,7 +310,7 @@ public class FestivalOfDarknessManager
 		}
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(GET_CLAN_NAME))
 			{
 				ps.setString(1, playerName);

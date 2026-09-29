@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 public class Topic
@@ -58,7 +59,7 @@ public class Topic
 		
 		_posts.add(new Post(0, ownerName, ownerId, date, _id, _forumId, text));
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_TOPIC);
 			PreparedStatement ps2 = con.prepareStatement(INSERT_POST))
 		{
@@ -128,7 +129,7 @@ public class Topic
 	{
 		forum.removeTopic(_id);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_TOPIC);
 			PreparedStatement ps2 = con.prepareStatement(DELETE_POST))
 		{

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.email.sql.EmailDAO;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.gameserver.model.actor.Player;
@@ -35,7 +36,7 @@ public class EmailDeliveryTask
 	
 	public void loadAllPending()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 		     PreparedStatement ps = con.prepareStatement("SELECT email_id, expiration_time FROM player_emails WHERE status='PENDING'"))
 		{
 			try (ResultSet rs = ps.executeQuery())

@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.util.StringTokenizer;
 
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.LoginServerThread;
@@ -314,7 +315,7 @@ public class AdminPunish implements IAdminCommandHandler
 		else
 			punishement = PunishmentType.NONE;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_BAN))
 		{
 			ps.setInt(1, punishement.ordinal());
@@ -338,7 +339,7 @@ public class AdminPunish implements IAdminCommandHandler
 	
 	private static void jailOfflinePlayer(Player player, String playerName, int delay)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_JAIL))
 		{
 			ps.setInt(1, PunishmentType.JAIL.ordinal());
@@ -360,7 +361,7 @@ public class AdminPunish implements IAdminCommandHandler
 	
 	private static void unjailOfflinePlayer(Player player, String playerName)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_UNJAIL))
 		{
 			ps.setString(1, playerName);
@@ -395,7 +396,7 @@ public class AdminPunish implements IAdminCommandHandler
 				return;
 			}
 			
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_ACCESS))
 			{
 				ps.setInt(1, lvl);

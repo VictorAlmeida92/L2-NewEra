@@ -32,6 +32,7 @@ import ext.mods.gameserver.model.actor.Player;
 import ext.mods.gameserver.model.entity.autofarm.AutoFarmManager;
 import ext.mods.gameserver.network.GameClient;
 import ext.mods.gameserver.network.serverpackets.ValidateLocation;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.model.olympiad.OlympiadGameManager;
 import ext.mods.gameserver.model.olympiad.OlympiadGameTask;
@@ -288,7 +289,7 @@ public final class SafeDisconnectManager
 	 */
 	private void setCharacterOnlineToZero(int objectId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("UPDATE characters SET online=0, lastAccess=? WHERE obj_id=?"))
 		{
 			ps.setLong(1, System.currentTimeMillis());

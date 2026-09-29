@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -243,7 +244,7 @@ public class DerbyTrackManager
 	 */
 	private void loadHistory()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_HISTORY);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -269,7 +270,7 @@ public class DerbyTrackManager
 	 */
 	private void loadBets()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_BETS);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -290,7 +291,7 @@ public class DerbyTrackManager
 		for (int key : _betsPerLane.keySet())
 			_betsPerLane.put(key, 0L);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(CLEAR_BETS))
 		{
 			ps.execute();
@@ -315,7 +316,7 @@ public class DerbyTrackManager
 		
 		if (saveOnDb)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("mdt_bets", "lane_id,bet", "?,?", "lane_id", "bet")))
 			{
 				ps.setInt(1, lane);
@@ -428,7 +429,7 @@ public class DerbyTrackManager
 					info.setSecond(getSecond());
 					info.setOddRate(_odds.get(getFirst()));
 					
-					try (Connection con = ConnectionPool.getConnection();
+					try (Connection con = DatabaseConnection.open();
 						PreparedStatement ps = con.prepareStatement(SAVE_HISTORY))
 					{
 						ps.setInt(1, info.getRaceId());

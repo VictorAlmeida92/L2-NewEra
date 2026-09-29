@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.model.actor.Player;
@@ -141,7 +142,7 @@ public class DungeonManager
 	
 	private static long getNextJoinTime(int dungeonId, int playerId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("SELECT next_join FROM dungeon_cooldowns WHERE dungeon_id = ? AND player_id = ?"))
 		{
 			
@@ -194,7 +195,7 @@ public class DungeonManager
 	
 	public void updateStage(int dungeonId, int playerId, int stage)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("UPDATE dungeon_cooldowns SET stage = ? WHERE dungeon_id = ? AND player_id = ?"))
 		{
 			ps.setInt(1, stage);
@@ -211,7 +212,7 @@ public class DungeonManager
 	
 	public void savePlayerCooldown(int dungeonId, int playerId, long lastJoin, long cooldownMillis, String ipAddress, int stage)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("dungeon_cooldowns", "dungeon_id, player_id, last_join, next_join, ip_address, stage", "?, ?, ?, ?, ?, ?", "dungeon_id, player_id", "last_join, next_join, ip_address, stage")))
 		{
 			
@@ -235,7 +236,7 @@ public class DungeonManager
 	
 	public int getPlayerSavedStage(int dungeonId, int playerId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("SELECT stage FROM dungeon_cooldowns WHERE dungeon_id = ? AND player_id = ?"))
 		{
 			ps.setInt(1, dungeonId);

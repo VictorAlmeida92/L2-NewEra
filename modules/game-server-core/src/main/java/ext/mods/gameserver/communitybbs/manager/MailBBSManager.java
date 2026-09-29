@@ -29,6 +29,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.communitybbs.model.Mail;
@@ -57,7 +58,7 @@ public class MailBBSManager extends BaseBBSManager
 	
 	protected MailBBSManager()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_MAILS);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -388,7 +389,7 @@ public class MailBBSManager extends BaseBBSManager
 		final Timestamp time = new Timestamp(currentDate);
 		final String formattedTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(time);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_MAIL))
 		{
 			ps.setInt(3, player.getObjectId());
@@ -522,7 +523,7 @@ public class MailBBSManager extends BaseBBSManager
 	{
 		getMails(player.getObjectId()).removeIf(m -> m.getId() == mailId);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_MAIL))
 		{
 			ps.setInt(1, mailId);
@@ -540,7 +541,7 @@ public class MailBBSManager extends BaseBBSManager
 		if (mail != null)
 			mail.setAsRead();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_MAIL_AS_READ))
 		{
 			ps.setInt(1, mailId);
@@ -558,7 +559,7 @@ public class MailBBSManager extends BaseBBSManager
 		if (mail != null)
 			mail.setMailType(location);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_MAIL_LOCATION))
 		{
 			ps.setString(1, location.toString().toLowerCase());

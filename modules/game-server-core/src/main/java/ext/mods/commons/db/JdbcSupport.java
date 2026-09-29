@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 import ext.mods.commons.logging.CLogger;
-import ext.mods.commons.pool.ConnectionPool;
+import ext.mods.commons.jdbc.DatabaseConnection;
 
 /**
- * Small helpers around {@link ConnectionPool} for Phase 5 repositories.
+ * Small JDBC helpers built on the application database connection port.
  */
 public final class JdbcSupport
 {
@@ -20,6 +20,12 @@ public final class JdbcSupport
 	
 	private JdbcSupport()
 	{
+	}
+
+	/** Opens a session through the application database port. */
+	public static Connection connection() throws SQLException
+	{
+		return DatabaseConnection.open();
 	}
 	
 	@FunctionalInterface
@@ -42,7 +48,7 @@ public final class JdbcSupport
 	
 	public static void run(SqlConsumer consumer)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = connection())
 		{
 			consumer.accept(con);
 		}
@@ -55,7 +61,7 @@ public final class JdbcSupport
 	
 	public static <R> R call(SqlFunction<R> function)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = connection())
 		{
 			return function.apply(con);
 		}

@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.util.concurrent.TimeUnit;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -115,7 +116,7 @@ public class PcCafeManager
 	
 	public void onReset()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(CLEAR_MEMO))
 		{
 			ps.executeUpdate();

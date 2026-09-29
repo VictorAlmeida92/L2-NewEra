@@ -30,6 +30,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.Config;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.util.ArraysUtil;
@@ -90,7 +91,7 @@ public class Siege implements Siegable
 				_registeredClans.put(clan, SiegeSide.OWNER);
 		}
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(LOAD_SIEGE_CLAN))
 			{
@@ -500,7 +501,7 @@ public class Siege implements Siegable
 	/** Clear all registered siege clans from database for castle */
 	public void clearAllClans()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(CLEAR_SIEGE_CLANS))
 		{
 			ps.setInt(1, _castle.getId());
@@ -524,7 +525,7 @@ public class Siege implements Siegable
 	/** Clear all siege clans waiting for approval from database for castle */
 	protected void clearPendingClans()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(CLEAR_PENDING_CLANS))
 		{
 			ps.setInt(1, _castle.getId());
@@ -629,7 +630,7 @@ public class Siege implements Siegable
 		if (clan == null || clan.getCastleId() == _castle.getId() || _registeredClans.remove(clan) == null)
 			return;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(CLEAR_SIEGE_CLAN))
 		{
 			ps.setInt(1, _castle.getId());
@@ -744,7 +745,7 @@ public class Siege implements Siegable
 			_siegeTask = ThreadPool.schedule(this::siegeStart, 1000);
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_SIEGE_INFOS))
 		{
 			ps.setLong(1, getSiegeDate().getTimeInMillis());
@@ -781,7 +782,7 @@ public class Siege implements Siegable
 				break;
 		}
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(CLEAR_SIEGE_CLAN))
 			{

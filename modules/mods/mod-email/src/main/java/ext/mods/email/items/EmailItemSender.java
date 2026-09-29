@@ -24,6 +24,7 @@ import java.util.Map;
 
 import ext.mods.Crypta.PlayerEmailManager;
 import ext.mods.email.task.EmailDeliveryTask;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.idfactory.IdFactory;
@@ -146,7 +147,7 @@ public class EmailItemSender
 			return target.getObjectId();
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("SELECT obj_Id FROM characters WHERE char_name = ?"))
 		{
 			

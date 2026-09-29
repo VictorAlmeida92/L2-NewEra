@@ -29,6 +29,7 @@ import java.util.Map;
 
 import ext.mods.commons.data.xml.IXmlReader;
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.enums.SpawnType;
@@ -238,7 +239,7 @@ public class ZoneManager implements IXmlReader
 	 */
 	public final void save()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(TRUNCATE_GRAND_BOSS_LIST))
 			{

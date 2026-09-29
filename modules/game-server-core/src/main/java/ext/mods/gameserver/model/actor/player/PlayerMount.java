@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.gameserver.data.SkillTable.FrequentSkill;
@@ -316,7 +317,7 @@ public final class PlayerMount
 	{
 		if (_controlItemId != 0 && petId != 0)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_PET_FED))
 			{
 				ps.setInt(1, getCurrentFeed());

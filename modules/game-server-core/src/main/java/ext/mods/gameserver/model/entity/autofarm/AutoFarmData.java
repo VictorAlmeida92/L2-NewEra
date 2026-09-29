@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.model.entity.autofarm.AutoFarmManager.AutoFarmType;
@@ -61,7 +62,7 @@ public class AutoFarmData
 	
 	private void restoreSkills(Player player)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_SKILLS))
 		{
 			ps.setInt(1, player.getObjectId());
@@ -90,7 +91,7 @@ public class AutoFarmData
 		final AutoFarmProfile profile = AutoFarmManager.getInstance().getProfile(player);
 		if (profile == null) return;
 
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement psDel = con.prepareStatement(DELETE_SKILLS))
 			{
@@ -121,7 +122,7 @@ public class AutoFarmData
 
 	private void restoreAreas(Player player)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps1 = con.prepareStatement(LOAD_AREAS))
 		{
 			ps1.setInt(1, player.getObjectId());
@@ -177,7 +178,7 @@ public class AutoFarmData
 	
 	public void deleteArea(int playerId, int areaId)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps1 = con.prepareStatement(DELETE_AREA))
 			{
@@ -200,7 +201,7 @@ public class AutoFarmData
 	
 	public void insertNodes(AutoFarmArea area)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps1 = con.prepareStatement(DELETE_NODES))
 			{
@@ -232,7 +233,7 @@ public class AutoFarmData
 	
 	public void insertArea(int playerId, AutoFarmArea area)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_AREA))
 		{
 			ps.setInt(1, playerId);
@@ -257,7 +258,7 @@ public class AutoFarmData
     }
 
     public void updatePlayerTimeUsage(int objectId, long timeUsed) {
-        try (Connection con = ConnectionPool.getConnection();
+        try (Connection con = DatabaseConnection.open();
              PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("autofarm_player_data", "player_id, time_used", "?, ?", "player_id", "time_used"))) {
             ps.setInt(1, objectId);
             ps.setLong(2, timeUsed);
@@ -268,7 +269,7 @@ public class AutoFarmData
     }
 
     public long loadPlayerTimeUsage(int objectId) {
-        try (Connection con = ConnectionPool.getConnection();
+        try (Connection con = DatabaseConnection.open();
              PreparedStatement ps = con.prepareStatement(LOAD_TIME_USAGE)) {
             ps.setInt(1, objectId);
             try (ResultSet rs = ps.executeQuery()) {

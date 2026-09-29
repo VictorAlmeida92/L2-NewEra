@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -62,7 +63,7 @@ public class CommunityBoard
 		if (!ConfigServer.ENABLE_COMMUNITY_BOARD)
 			return;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_FORUMS);
 			PreparedStatement ps2 = con.prepareStatement(SELECT_TOPICS);
 			PreparedStatement ps3 = con.prepareStatement(SELECT_POSTS))

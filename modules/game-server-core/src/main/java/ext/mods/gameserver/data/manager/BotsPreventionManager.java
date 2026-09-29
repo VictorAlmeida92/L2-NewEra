@@ -32,6 +32,7 @@ import java.util.concurrent.Future;
 import ext.mods.Config;
 import ext.mods.commons.lang.StringUtil;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -249,7 +250,7 @@ public class BotsPreventionManager
 			player.getPunishment().setType(PunishmentType.JAIL, ConfigProject.PUNISHMENT_TIME);
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_JAIL))
 			{
 				ps.setInt(1, PunishmentType.JAIL.ordinal());
@@ -273,7 +274,7 @@ public class BotsPreventionManager
 		}
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement statement = con.prepareStatement(ACCESS_LEVEL))
 			{
 				statement.setInt(1, lvl);

@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -119,7 +120,7 @@ public class CursedWeapon
 		
 		_skillMaxLevel = SkillTable.getInstance().getMaxLevel(_skillId);
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(LOAD_CW))
 			{
@@ -290,7 +291,7 @@ public class CursedWeapon
 			{
 				LOGGER.info("{} is being removed offline.", _name);
 				
-				try (Connection con = ConnectionPool.getConnection();
+				try (Connection con = DatabaseConnection.open();
 					PreparedStatement del = con.prepareStatement(DELETE_ITEM);
 					PreparedStatement ps = con.prepareStatement(UPDATE_PLAYER))
 				{
@@ -541,7 +542,7 @@ public class CursedWeapon
 		
 		cancelDropTimer();
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(INSERT_CW))
 			{
@@ -594,7 +595,7 @@ public class CursedWeapon
 	 */
 	private void removeFromDb()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(DELETE_CW))
 			{
@@ -728,7 +729,7 @@ public class CursedWeapon
 				endOfLife();
 			else
 			{
-				try (Connection con = ConnectionPool.getConnection())
+				try (Connection con = DatabaseConnection.open())
 				{
 					try (PreparedStatement ps = con.prepareStatement(UPDATE_CW))
 					{

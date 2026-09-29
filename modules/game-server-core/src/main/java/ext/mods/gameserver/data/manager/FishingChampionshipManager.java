@@ -26,6 +26,7 @@ import java.util.List;
 
 import ext.mods.commons.lang.StringUtil;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -117,7 +118,7 @@ public class FishingChampionshipManager
 	{
 		_endDate = ServerMemoTable.getInstance().getLong("fishChampionshipEnd", 0);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT))
 		{
 			try (ResultSet rs = ps.executeQuery())
@@ -448,7 +449,7 @@ public class FishingChampionshipManager
 	{
 		ServerMemoTable.getInstance().set("fishChampionshipEnd", _endDate);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(TRUNCATE);
 			PreparedStatement ps2 = con.prepareStatement(INSERT))
 		{

@@ -24,6 +24,7 @@ import java.util.Scanner;
 
 import ext.mods.commons.crypt.BCrypt;
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -151,7 +152,7 @@ public class SQLAccountManager
 		
 		q = q.concat(" ORDER BY login ASC");
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(q);
 			ResultSet rset = ps.executeQuery())
 		{
@@ -172,7 +173,7 @@ public class SQLAccountManager
 	
 	private static void addOrUpdateAccount(String account, String password, String level)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("accounts", "login, password, access_level", "?, ?, ?", "login", "password, access_level")))
 		{
 			final String hashed = BCrypt.hashPw(password);
@@ -195,7 +196,7 @@ public class SQLAccountManager
 	
 	private static void changeAccountLevel(String account, String level)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_ACCOUNT_LEVEL))
 		{
 			ps.setString(1, level);
@@ -214,7 +215,7 @@ public class SQLAccountManager
 	
 	private static void deleteAccount(String account)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_ACCOUNT))
 		{
 			ps.setString(1, account);

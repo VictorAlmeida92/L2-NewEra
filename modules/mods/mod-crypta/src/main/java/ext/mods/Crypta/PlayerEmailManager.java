@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Logger;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.sql.PlayerInfoTable;
 import ext.mods.gameserver.data.xml.ItemData;
@@ -95,7 +96,7 @@ public class PlayerEmailManager
 
 		sb.append("<table width=300 cellspacing=0 cellpadding=3 bgcolor=000000>");
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("SELECT char_name, online FROM characters " + "WHERE LOWER(char_name) LIKE ? AND char_name != ? AND accesslevel = 0 " + "ORDER BY online DESC, char_name LIMIT 15"))
 		{
 			ps.setString(1, "%" + targetName.toLowerCase() + "%");
@@ -148,7 +149,7 @@ public class PlayerEmailManager
 	    sb.append("<html><body>");
 	    sb.append("<table width=300><tr><td align=center><font color=\"LEVEL\">Sua Inbox de Emails</font></td></tr></table><br>");
 
-	    try (Connection con = ConnectionPool.getConnection();
+	    try (Connection con = DatabaseConnection.open();
 	         PreparedStatement ps = con.prepareStatement(
 	             "SELECT DISTINCT email_id, sender_id, expiration_time, is_paid, payment_item_id, payment_item_count FROM player_emails " +
 	             "WHERE target_id=? AND status='PENDING' AND expiration_time > ? ORDER BY created_time DESC")) {

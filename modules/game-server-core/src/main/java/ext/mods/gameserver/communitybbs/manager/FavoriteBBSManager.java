@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.communitybbs.model.Favorite;
@@ -45,7 +46,7 @@ public class FavoriteBBSManager extends BaseBBSManager
 	
 	protected FavoriteBBSManager()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_FAVORITES);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -118,7 +119,7 @@ public class FavoriteBBSManager extends BaseBBSManager
 				
 				getFavorites(playerId).add(new Favorite(id, playerId, title, bypass, date));
 				
-				try (Connection con = ConnectionPool.getConnection();
+				try (Connection con = DatabaseConnection.open();
 					PreparedStatement ps = con.prepareStatement(INSERT_FAVORITE))
 				{
 					ps.setInt(1, id);
@@ -146,7 +147,7 @@ public class FavoriteBBSManager extends BaseBBSManager
 			
 			if (getFavorites(player.getObjectId()).removeIf(f -> f.getId() == id))
 			{
-				try (Connection con = ConnectionPool.getConnection();
+				try (Connection con = DatabaseConnection.open();
 					PreparedStatement ps = con.prepareStatement(DELETE_FAVORITE))
 				{
 					ps.setInt(1, id);

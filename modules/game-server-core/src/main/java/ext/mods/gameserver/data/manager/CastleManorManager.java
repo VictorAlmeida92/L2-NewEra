@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.data.xml.IXmlReader;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -93,7 +94,7 @@ public class CastleManorManager implements IXmlReader
 		
 		load();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement stProduction = con.prepareStatement(LOAD_PRODUCTION);
 			PreparedStatement stProcure = con.prepareStatement(LOAD_PROCURE))
 		{
@@ -350,7 +351,7 @@ public class CastleManorManager implements IXmlReader
 	
 	public static final void updateCurrentProduction(int castleId, Collection<SeedProduction> items)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_PRODUCTION))
 		{
 			for (SeedProduction sp : items)
@@ -370,7 +371,7 @@ public class CastleManorManager implements IXmlReader
 	
 	public static final void updateCurrentProcure(int castleId, Collection<CropProcure> items)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_PROCURE))
 		{
 			for (CropProcure sp : items)
@@ -442,7 +443,7 @@ public class CastleManorManager implements IXmlReader
 	
 	public final boolean storeMe()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ds = con.prepareStatement(TRUNCATE_PRODUCTS);
 			PreparedStatement is = con.prepareStatement(INSERT_PRODUCT);
 			PreparedStatement dp = con.prepareStatement(TRUNCATE_PROCURES);
