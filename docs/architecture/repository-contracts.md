@@ -105,3 +105,64 @@ session: macros, shortcuts, recipes, hennas, mission progress and memos.
 names, JDBC statements and dialect-specific upserts. The player models keep
 their validation, parsing and packet behavior and call
 `PlayerAuxiliaryPersistenceService` for persistence.
+
+## Repository matrix
+
+The following matrix is the current composition boundary. Game code consumes
+the port in the first column; the JDBC class in the second column is selected
+only by `PersistenceRegistry`.
+
+| Port | Current adapter | Main responsibility |
+| --- | --- | --- |
+| `BookmarkStore` | `JdbcBookmarkStore` | GM/player bookmarks |
+| `BufferSchemeStore` | `JdbcBufferSchemeStore` | Saved buffer schemes |
+| `BuyListStore` | `JdbcBuyListStore` | Buy-list restock state |
+| `CastleStore` | `JdbcCastleStore` | Castles, owners, doors and traps |
+| `CharacterSelectionStore` | `JdbcCharacterSelectionStore` | Account character selection |
+| `CharacterStore` | `JdbcCharacterStore` | Character lifecycle and base state |
+| `ClanHallAuctionStore` | `JdbcClanHallAuctionStore` | Clan-hall bids and sellers |
+| `ClanStore` | `JdbcClanStore` | Clans, wars and ranking |
+| `CustomEventStateStore` | `JdbcCustomEventStateStore` | Custom event enablement |
+| `GameServerRegistrationStore` | `JdbcGameServerRegistrationStore` | LoginServer gameserver registry |
+| `ItemStore` | `JdbcItemStore` | Inventory, augmentation and pet items |
+| `OfflineTraderStore` | `JdbcOfflineTraderStore` | Offline trade snapshots |
+| `OlympiadStore` | `JdbcOlympiadStore` | Olympiad cycle, nobles and rankings |
+| `PlayerAuxiliaryStore` | `JdbcPlayerAuxiliaryStore` | Macros, shortcuts, recipes, hennas, missions and memos |
+| `PlayerInfoStore` | `JdbcPlayerInfoStore` | Player directory/admin information |
+| `PremiumStore` | `JdbcPremiumStore` | Account premium service and expiry |
+| `QuestStore` | `JdbcQuestStore` | Quest variables and completion state |
+| `RecommendationStore` | `JdbcRecommendationStore` | Recommendations and counters |
+| `ServerMemoStore` | `JdbcServerMemoStore` | Server-wide key/value state |
+| `SkillStore` | `JdbcSkillStore` | Learned skills and saved effects |
+| `SubclassStore` | `JdbcSubclassStore` | Subclass slots and replacement cleanup |
+
+## Contract rules
+
+1. A port describes domain data and operations, not tables or SQL syntax.
+2. Records crossing a port are value objects. They must not contain a JDBC
+   connection, statement, result set or mutable adapter state.
+3. Transactional behavior is part of the operation contract. Methods such as
+   character deletion, subclass wipe, recommendation update and skill-save
+   replacement must either complete their documented unit of work or leave the
+   database unchanged.
+4. Loading methods must not mutate gameplay state. The application service or
+   model applies the returned records and owns validation and packet behavior.
+5. The adapter owns SQL dialect selection, parameter binding, connection
+   lifecycle and translation of database failures.
+6. `PersistenceRegistry` is the only GameServer composition root for the
+   current JDBC implementations. New game code must not instantiate a
+   `Jdbc*Store` directly.
+
+## Transitional limitations
+
+Some ports still declare `java.sql.SQLException` for compatibility with the
+existing call sites. This is the remaining JDBC leak in the public contract;
+it does not expose a connection or SQL statement, but it couples error
+handling to JDBC. Removing that exception from ports requires a separate,
+tested error-mapping change and is therefore deferred to the architectural
+modernization phase rather than being hidden in this documentation PR.
+
+The repository contracts are currently verified by build scans and
+`RepositoryContractBoundaryTest`. The test allows the transitional
+`SQLException` declaration but rejects concrete JDBC types and SQL statements
+inside the port package.
