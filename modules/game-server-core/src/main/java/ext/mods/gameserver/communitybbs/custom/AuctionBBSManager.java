@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import ext.mods.commons.data.Pagination;
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -57,7 +58,7 @@ public class AuctionBBSManager extends BaseBBSManager
 	
 	public void load()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_AUCTION);
 			ResultSet rs = ps.executeQuery())
 		{

@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.data.sql.PlayerInfoTable;
@@ -53,7 +54,7 @@ public class RelationManager
 	
 	private RelationManager()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -74,7 +75,7 @@ public class RelationManager
 		if (_relations.isEmpty())
 			return;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("character_relations", "char_id, friend_id, relation", "?,?,?", "char_id, friend_id", "relation"));
 			PreparedStatement ps2 = con.prepareStatement(DELETE))
 		{

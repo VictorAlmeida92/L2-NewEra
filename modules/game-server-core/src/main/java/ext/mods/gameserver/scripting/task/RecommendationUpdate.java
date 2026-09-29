@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.model.World;
@@ -66,7 +67,7 @@ public final class RecommendationUpdate extends ScheduledQuest
 			player.sendPacket(new UserInfo(player));
 		}
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(TRUNCATE_RECOMMENDS))
 			{

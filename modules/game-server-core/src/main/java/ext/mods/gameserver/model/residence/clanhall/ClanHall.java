@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -338,7 +339,7 @@ public class ClanHall extends Residence
 	{
 		_functions.clear();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_FUNCTIONS))
 		{
 			ps.setInt(1, getId());
@@ -391,7 +392,7 @@ public class ClanHall extends Residence
 	 */
 	public void updateDb()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_CH))
 		{
 			ps.setInt(1, _ownerId);

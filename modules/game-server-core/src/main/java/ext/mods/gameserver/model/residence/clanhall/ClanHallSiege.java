@@ -28,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -308,7 +309,7 @@ public abstract class ClanHallSiege extends Quest implements Siegable
 	
 	public void loadAttackers()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_ATTACKERS))
 		{
 			ps.setInt(1, _hall.getId());
@@ -331,7 +332,7 @@ public abstract class ClanHallSiege extends Quest implements Siegable
 	
 	public final void saveAttackers()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(DELETE_ATTACKERS))
 			{
@@ -361,7 +362,7 @@ public abstract class ClanHallSiege extends Quest implements Siegable
 	
 	public final void updateAttackers()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_ATTACKERS))
 		{
 			ps.setInt(1, _hall.getId());

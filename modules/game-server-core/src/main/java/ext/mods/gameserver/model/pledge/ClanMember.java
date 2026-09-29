@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -209,7 +210,7 @@ public class ClanMember
 			_player.setPledgeType(pledgeType);
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_PLEDGE))
 			{
 				ps.setInt(1, _pledgeType);
@@ -236,7 +237,7 @@ public class ClanMember
 			_player.setPowerGrade(powerGrade);
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_POWER_GRADE))
 			{
 				ps.setInt(1, _powerGrade);
@@ -301,7 +302,7 @@ public class ClanMember
 	 */
 	public void saveApprenticeAndSponsor(int apprentice, int sponsor)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_SPONSOR))
 		{
 			ps.setInt(1, apprentice);

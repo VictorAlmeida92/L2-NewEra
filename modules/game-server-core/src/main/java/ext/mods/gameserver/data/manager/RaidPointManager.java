@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.model.actor.Player;
@@ -49,7 +50,7 @@ public class RaidPointManager
 	
 	public RaidPointManager()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_DATA);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -91,7 +92,7 @@ public class RaidPointManager
 		
 		points = playerData.merge(bossId, points, Integer::sum);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("character_raid_points", "char_id,boss_id,points", "?,?,?", "char_id,boss_id", "points")))
 		{
 			ps.setInt(1, objectId);
@@ -125,7 +126,7 @@ public class RaidPointManager
 	{
 		_entries.clear();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(TRUNCATE_DATA))
 		{
 			ps.executeUpdate();

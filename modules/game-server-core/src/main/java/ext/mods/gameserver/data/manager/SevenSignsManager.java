@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -365,7 +366,7 @@ public class SevenSignsManager
 	 */
 	protected void restoreSevenSignsData()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(LOAD_DATA);
 				ResultSet rs = ps.executeQuery())
@@ -428,7 +429,7 @@ public class SevenSignsManager
 	 */
 	public void saveSevenSignsData()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_PLAYER))
 		{
 			for (StatSet set : _playersData.values())
@@ -453,7 +454,7 @@ public class SevenSignsManager
 	
 	public final void saveSevenSignsStatus()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_STATUS))
 		{
 			ps.setInt(1, _currentCycle);
@@ -531,7 +532,7 @@ public class SevenSignsManager
 			
 			_playersData.put(objectId, set);
 			
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(INSERT_PLAYER))
 			{
 				ps.setInt(1, objectId);

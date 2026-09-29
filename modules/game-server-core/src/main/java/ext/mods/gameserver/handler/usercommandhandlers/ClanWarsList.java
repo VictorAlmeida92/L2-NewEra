@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.handler.IUserCommandHandler;
@@ -52,7 +53,7 @@ public class ClanWarsList implements IUserCommandHandler
 			return;
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement((id == 88) ? SELECT_ATTACK_LIST : ((id == 89) ? SELECT_UNDER_ATTACK_LIST : SELECT_WAR_LIST)))
 		{
 			ps.setInt(1, clan.getClanId());

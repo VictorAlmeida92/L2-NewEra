@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.data.Pagination;
 import ext.mods.commons.logging.CLogger;
@@ -1509,7 +1510,7 @@ public class DonationManager implements DonationService
 			// Fallback: if in-memory returned empty, query the database directly for persisted donations
 			if (result.isEmpty() && accountName != null && !accountName.isBlank())
 			{
-				try (Connection con = ConnectionPool.getConnection();
+				try (Connection con = DatabaseConnection.open();
 					PreparedStatement ps = con.prepareStatement(
 						"SELECT d.purchase_id, d.date, c.char_name, d.quantity, d.unit_price, d.currency, d.status, d.payment_method " +
 						"FROM donations d " +

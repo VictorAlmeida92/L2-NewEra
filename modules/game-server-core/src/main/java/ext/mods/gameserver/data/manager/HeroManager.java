@@ -35,6 +35,7 @@ import ext.mods.commons.data.StatSet;
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.lang.StringUtil;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.sql.ClanTable;
 import ext.mods.gameserver.data.sql.PlayerInfoTable;
@@ -99,7 +100,7 @@ public class HeroManager
 	
 	protected HeroManager()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps2 = con.prepareStatement(LOAD_CLAN_DATA))
 		{
 			try (PreparedStatement ps = con.prepareStatement(LOAD_HEROES);
@@ -238,7 +239,7 @@ public class HeroManager
 	 */
 	private void loadMessage(int objectId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_MESSAGE))
 		{
 			ps.setInt(1, objectId);
@@ -259,7 +260,7 @@ public class HeroManager
 	{
 		int entries = 0;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_DIARY))
 		{
 			ps.setInt(1, objectId);
@@ -320,7 +321,7 @@ public class HeroManager
 		int losses = 0;
 		int draws = 0;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_FIGHTS))
 		{
 			ps.setInt(1, charId);
@@ -585,7 +586,7 @@ public class HeroManager
 	
 	public synchronized void computeNewHeroes()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(RESET_PLAYED))
 		{
 			ps.execute();
@@ -622,7 +623,7 @@ public class HeroManager
 		
 		final List<StatSet> newHeroes = new ArrayList<>();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_HEROES_TO_BE))
 		{
 			for (ClassId id : ClassId.VALUES)
@@ -684,7 +685,7 @@ public class HeroManager
 			heroes.put(objectId, set);
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_ITEMS))
 		{
 			ps.execute();
@@ -702,7 +703,7 @@ public class HeroManager
 	
 	private void updateHeroes()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("heroes", "char_id, class_id, count, played, active", "?,?,?,?,?", "char_id", "count, played, active")))
 		{
 			for (Map.Entry<Integer, StatSet> heroEntry : _heroes.entrySet())
@@ -823,7 +824,7 @@ public class HeroManager
 	
 	public void setDiaryData(int objectId, int action, int param)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_DIARY))
 		{
 			ps.setInt(1, objectId);
@@ -853,7 +854,7 @@ public class HeroManager
 	 */
 	public void shutdown()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_MESSAGE))
 		{
 			for (Map.Entry<Integer, String> entry : _heroMessages.entrySet())

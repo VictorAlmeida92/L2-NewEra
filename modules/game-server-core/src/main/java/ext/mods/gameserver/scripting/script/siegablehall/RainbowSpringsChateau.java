@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -365,7 +366,7 @@ public final class RainbowSpringsChateau extends ClanHallSiege
 	@Override
 	public void loadAttackers()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_ATTACKERS);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -382,7 +383,7 @@ public final class RainbowSpringsChateau extends ClanHallSiege
 	{
 		_warDecrees.put(clanId, count);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_ATTACKER))
 		{
 			ps.setInt(1, clanId);
@@ -399,7 +400,7 @@ public final class RainbowSpringsChateau extends ClanHallSiege
 	{
 		_warDecrees.remove(clanId);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_ATTACKER))
 		{
 			ps.setInt(1, clanId);
@@ -415,7 +416,7 @@ public final class RainbowSpringsChateau extends ClanHallSiege
 	{
 		_warDecrees.clear();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_ALL_ATTACKERS))
 		{
 			ps.execute();

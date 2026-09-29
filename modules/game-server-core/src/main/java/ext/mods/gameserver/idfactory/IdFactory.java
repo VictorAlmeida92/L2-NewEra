@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.math.PrimeFinder;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -75,7 +76,7 @@ public class IdFactory
 		
 		final List<Integer> usedObjectIds = new ArrayList<>();
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (Statement st = con.createStatement())
 			{
@@ -219,7 +220,7 @@ public class IdFactory
 	 */
 	private static void setAllCharacterOffline()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("UPDATE characters SET online = 0"))
 		{
 			ps.executeUpdate();
@@ -238,7 +239,7 @@ public class IdFactory
 	{
 		int cleanCount = 0;
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (Statement stmt = con.createStatement())
 			{
@@ -316,7 +317,7 @@ public class IdFactory
 	{
 		int cleanCount = 0;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("DELETE FROM character_skills_save WHERE restore_type = 1 AND systime <= ?"))
 		{
 			ps.setLong(1, System.currentTimeMillis());

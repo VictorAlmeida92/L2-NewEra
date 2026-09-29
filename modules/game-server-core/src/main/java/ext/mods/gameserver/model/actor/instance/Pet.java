@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -319,7 +320,7 @@ public class Pet extends Summon
 		if (_controlItemId == 0)
 			return;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("pets", "name,level,curHp,curMp,exp,sp,fed,item_obj_id", "?,?,?,?,?,?,?,?", "item_obj_id", "name,level,curHp,curMp,exp,sp,fed")))
 		{
 			ps.setString(1, getName());
@@ -496,7 +497,7 @@ public class Pet extends Summon
 		
 		owner.destroyItem(_controlItemId, 1, false);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_PET))
 		{
 			ps.setInt(1, _controlItemId);
@@ -516,7 +517,7 @@ public class Pet extends Summon
 		else
 			pet = new Pet(IdFactory.getInstance().getNextId(), template, owner, control);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_PET))
 		{
 			ps.setInt(1, control.getObjectId());

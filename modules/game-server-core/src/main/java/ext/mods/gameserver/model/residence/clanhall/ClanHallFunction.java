@@ -23,6 +23,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -165,7 +166,7 @@ public class ClanHallFunction
 	 */
 	public void dbSave()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("clanhall_functions", "hall_id,type,lvl,lease,rate,endTime", "?,?,?,?,?,?", "hall_id,type", "lvl,lease,rate,endTime")))
 		{
 			ps.setInt(1, _ch.getId());
@@ -191,7 +192,7 @@ public class ClanHallFunction
 		
 		_ch.getFunctions().remove(getType());
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_FUNCTION))
 		{
 			ps.setInt(1, _ch.getId());

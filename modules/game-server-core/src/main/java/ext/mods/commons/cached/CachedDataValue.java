@@ -21,6 +21,7 @@ import java.sql.SQLException;
 
 import ext.mods.commons.jdbc.SqlDialect;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 public class CachedDataValue
@@ -57,7 +58,7 @@ public class CachedDataValue
 	
 	void save()
 	{
-		try (var conn = ConnectionPool.getConnection();
+		try (var conn = DatabaseConnection.open();
 			var stmt = conn.prepareStatement(SqlDialect.upsert("character_data", "charId, valueName, valueData", "?, ?, ?", "charId, valueName", "valueData")))
 		{
 			stmt.setInt(1, charId);
@@ -73,7 +74,7 @@ public class CachedDataValue
 	
 	void load()
 	{
-		try (var conn = ConnectionPool.getConnection();
+		try (var conn = DatabaseConnection.open();
 			var stmt = conn.prepareStatement("SELECT valueData FROM character_data WHERE valueName=? AND charId=? LIMIT 1"))
 		{
 			stmt.setString(1, valueName);

@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.idfactory.IdFactory;
@@ -49,7 +50,7 @@ public class CoupleManager
 	
 	protected CoupleManager()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_COUPLES);
 			ResultSet rs = ps.executeQuery())
 		{
@@ -123,7 +124,7 @@ public class CoupleManager
 	 */
 	public void save()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(TRUNCATE_COUPLES))
 			{

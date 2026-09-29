@@ -135,8 +135,40 @@ tasks.register("checkDatabaseSql") {
     }
 }
 
+tasks.register("checkDatabaseConnectionBoundary") {
+    group = "verification"
+    description = "Blocks direct ConnectionPool access outside the database adapter boundary"
+
+    doLast {
+        val sourceFiles = rootProject.fileTree("modules") {
+            include("**/*.java")
+            include("**/*.kt")
+            exclude("**/src/test/**")
+            exclude("**/bin/**")
+            exclude("**/build/**")
+            exclude("**/ConnectionPool.java")
+            exclude("**/JdbcDatabaseConnectionAdapter.java")
+            exclude("**/DatabaseConnection.java")
+            exclude("**/DatabaseConnectionPort.java")
+            exclude("**/data/adapter/**")
+            exclude("**/persistence/**")
+            exclude("**/sql/**")
+            exclude("**/gameapi/db/**")
+        }
+        val findings = sourceFiles.flatMap { file ->
+            file.readLines().mapIndexedNotNull { index, line ->
+                if (line.contains("ConnectionPool.getConnection(")) "${file.path}:${index + 1}" else null
+            }
+        }
+        if (findings.isNotEmpty())
+            throw GradleException("Direct ConnectionPool access outside the adapter boundary: $findings")
+        logger.lifecycle("Database connection boundary scan: clean")
+    }
+}
+
 tasks.named("build") {
     dependsOn("checkDatabaseSql")
+    dependsOn("checkDatabaseConnectionBoundary")
 }
 
 tasks.register("brCompileIncremental") {

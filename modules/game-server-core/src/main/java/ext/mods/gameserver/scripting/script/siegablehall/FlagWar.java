@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.commons.random.Rnd;
@@ -616,7 +617,7 @@ public abstract class FlagWar extends ClanHallSiege
 		if (_data == null)
 			_data = HashMap.newHashMap(6);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SELECT_ATTACKERS))
 		{
 			ps.setInt(1, _hall.getId());
@@ -674,7 +675,7 @@ public abstract class FlagWar extends ClanHallSiege
 	
 	private final void saveClan(int clanId, int flag)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_ATTACKERS))
 		{
 			ps.setInt(1, _hall.getId());
@@ -691,7 +692,7 @@ public abstract class FlagWar extends ClanHallSiege
 	
 	protected final void saveNpc(int npc, int clanId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_ATTACKERS_NPC))
 		{
 			ps.setInt(1, npc);
@@ -706,7 +707,7 @@ public abstract class FlagWar extends ClanHallSiege
 	
 	protected final void saveMember(int clanId, int objectId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_MEMBERS))
 		{
 			ps.setInt(1, _hall.getId());
@@ -722,7 +723,7 @@ public abstract class FlagWar extends ClanHallSiege
 	
 	protected final void saveOwnersNpc(int clanId, int npcId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_OWNER_NPC))
 		{
 			ps.setInt(1, _hall.getId());
@@ -738,7 +739,7 @@ public abstract class FlagWar extends ClanHallSiege
 	
 	protected final void deleteOwnersNpc(int clanId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps1 = con.prepareStatement(DELETE_OWNER_NPC))
 		{
 			ps1.setInt(1, _hall.getId());
@@ -752,7 +753,7 @@ public abstract class FlagWar extends ClanHallSiege
 	
 	private void clearTables()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps1 = con.prepareStatement(DELETE_ATTACKERS);
 			PreparedStatement ps2 = con.prepareStatement(DELETE_MEMBERS))
 		{

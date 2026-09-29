@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.lang.StringUtil;
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -182,7 +183,7 @@ public class Clan
 	{
 		_clanId = clanId;
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement(LOAD_MEMBERS))
 			{
@@ -366,7 +367,7 @@ public class Clan
 			newLeader.broadcastUserInfo();
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(SET_MEMBER_POWER_GRADE))
 		{
 			ps.setInt(1, 0);
@@ -746,7 +747,7 @@ public class Clan
 		}
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection())
+			try (Connection con = DatabaseConnection.open())
 			{
 				try (PreparedStatement ps = con.prepareStatement(REMOVE_MEMBER))
 				{
@@ -871,7 +872,7 @@ public class Clan
 	 */
 	public void updateClanInDB()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_CLAN))
 		{
 			ps.setInt(1, _leader.getObjectId());
@@ -897,7 +898,7 @@ public class Clan
 	 */
 	public void store()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(STORE_CLAN))
 		{
 			ps.setInt(1, _clanId);
@@ -945,7 +946,7 @@ public class Clan
 		
 		if (saveOnDb)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_NOTICE))
 			{
 				ps.setBoolean(1, _noticeEnabled);
@@ -999,7 +1000,7 @@ public class Clan
 		
 		if (saveOnDb)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_INTRODUCTION))
 			{
 				ps.setString(1, _introduction);
@@ -1036,7 +1037,7 @@ public class Clan
 		if (existingSkill != null && existingSkill.getLevel() == skill.getLevel())
 			return false;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("clan_skills", "clan_id,skill_id,skill_level", "?,?,?", "clan_id,skill_id", "skill_level")))
 		{
 			ps.setInt(1, _clanId);
@@ -1079,7 +1080,7 @@ public class Clan
 		if (skill == null)
 			return false;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(REMOVE_SKILL))
 		{
 			ps.setInt(1, _clanId);
@@ -1114,7 +1115,7 @@ public class Clan
 		if (list.isEmpty())
 			return false;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("clan_skills", "clan_id,skill_id,skill_level", "?,?,?", "clan_id,skill_id", "skill_level")))
 		{
 			ps.setInt(1, _clanId);
@@ -1157,7 +1158,7 @@ public class Clan
 		if (_skills.isEmpty())
 			return false;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(REMOVE_ALL_SKILLS))
 		{
 			ps.setInt(1, _clanId);
@@ -1333,7 +1334,7 @@ public class Clan
 		
 		final String toSave = _graduates.stream().map(String::valueOf).collect(Collectors.joining(";"));
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_GRADUATES))
 		{
 			ps.setString(1, toSave);
@@ -1430,7 +1431,7 @@ public class Clan
 			return null;
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(INSERT_SUBPLEDGE))
 		{
 			ps.setInt(1, _clanId);
@@ -1498,7 +1499,7 @@ public class Clan
 	
 	public void updateSubPledgeInDB(SubPledge pledge)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_SUBPLEDGE))
 		{
 			ps.setInt(1, pledge.getLeaderId());
@@ -1537,7 +1538,7 @@ public class Clan
 		
 		broadcastClanStatus();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("clan_privs", "clan_id,ranking,privs", "?,?,?", "clan_id,ranking", "privs")))
 		{
 			ps.setInt(1, _clanId);
@@ -1645,7 +1646,7 @@ public class Clan
 		for (Player member : members)
 			member.broadcastPacket(infoRefresh, true);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_CRP))
 		{
 			ps.setInt(1, _reputationScore);
@@ -1678,7 +1679,7 @@ public class Clan
 	{
 		_auctionBiddedAt = id;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_AUCTION))
 		{
 			ps.setInt(1, id);
@@ -2080,7 +2081,7 @@ public class Clan
 	
 	public void changeLevel(int level)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_CLAN_LEVEL))
 		{
 			ps.setInt(1, level);
@@ -2120,7 +2121,7 @@ public class Clan
 		
 		_crestId = crestId;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_CLAN_CREST))
 		{
 			ps.setInt(1, crestId);
@@ -2154,7 +2155,7 @@ public class Clan
 			allyId = _allyId;
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(query))
 		{
 			ps.setInt(1, crestId);
@@ -2197,7 +2198,7 @@ public class Clan
 		
 		_crestLargeId = crestId;
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_LARGE_CREST))
 		{
 			ps.setInt(1, crestId);

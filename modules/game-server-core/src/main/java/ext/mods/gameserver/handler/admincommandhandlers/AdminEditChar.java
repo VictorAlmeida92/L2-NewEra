@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 
 import ext.mods.Config;
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 import ext.mods.gameserver.data.sql.ClanTable;
@@ -223,7 +224,7 @@ public class AdminEditChar implements IAdminCommandHandler
 							}
 							else
 							{
-								try (Connection con = ConnectionPool.getConnection();
+								try (Connection con = DatabaseConnection.open();
 									PreparedStatement ps = con.prepareStatement("UPDATE characters SET accesslevel=? WHERE char_name=?"))
 								{
 									ps.setInt(1, lvl);

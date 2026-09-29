@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.util.Calendar;
 
 import ext.mods.commons.data.StatSet;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.Config;
@@ -63,7 +64,7 @@ public final class SiegableHall extends ClanHall
 	@Override
 	public final void updateDb()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_CLANHALL))
 		{
 			ps.setInt(1, getOwnerId());

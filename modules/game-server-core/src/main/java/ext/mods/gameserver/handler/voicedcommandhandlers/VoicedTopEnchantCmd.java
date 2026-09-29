@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.util.StringTokenizer;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.data.xml.ItemData;
@@ -79,7 +80,7 @@ public class VoicedTopEnchantCmd implements IVoicedCommandHandler
 		
 		int offset = (page - 1) * PAGE_LIMIT_TOP_ENCHANT_RANKING;
 		
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			try (PreparedStatement ps = con.prepareStatement("SELECT cha.char_name, it.enchant_level, it.item_id FROM characters cha INNER JOIN items it ON cha.obj_Id = it.owner_id WHERE it.enchant_level > 1 AND cha.accesslevel = 0 ORDER BY it.enchant_level DESC LIMIT ?, ?"))
 			{

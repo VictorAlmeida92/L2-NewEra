@@ -29,6 +29,7 @@ import java.util.Map;
 
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.data.xml.IXmlReader;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.data.sql.ClanTable;
@@ -60,7 +61,7 @@ public class ClanHallManager implements IXmlReader
 	{
 		load();
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_CLANHALLS);
 			PreparedStatement ps2 = con.prepareStatement(LOAD_FUNCTIONS);
 			ResultSet rs = ps.executeQuery())

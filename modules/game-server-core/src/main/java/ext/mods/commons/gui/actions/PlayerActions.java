@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.enums.RestartType;
 import ext.mods.gameserver.model.World;
@@ -78,7 +79,7 @@ public class PlayerActions {
 		if (player != null) {
 			onLineRepair(player);
 		} else {
-			try (Connection con = ConnectionPool.getConnection(); PreparedStatement ps = con.prepareStatement("UPDATE characters SET x=?, y=?, z=? WHERE char_name=?")) {
+			try (Connection con = DatabaseConnection.open(); PreparedStatement ps = con.prepareStatement("UPDATE characters SET x=?, y=?, z=? WHERE char_name=?")) {
 				ps.setInt(1, 83345);
 				ps.setInt(2, 148144);
 				ps.setInt(3, -3413);
@@ -108,7 +109,7 @@ public class PlayerActions {
 		if (player != null) {
 			onLineChange(player, adminLevel);
 		} else {
-			try (Connection con = ConnectionPool.getConnection(); PreparedStatement ps = con.prepareStatement("UPDATE characters SET accesslevel=? WHERE char_name=?")) {
+			try (Connection con = DatabaseConnection.open(); PreparedStatement ps = con.prepareStatement("UPDATE characters SET accesslevel=? WHERE char_name=?")) {
 				ps.setInt(1, adminLevel);
 				ps.setString(2, name);
 				ps.execute();

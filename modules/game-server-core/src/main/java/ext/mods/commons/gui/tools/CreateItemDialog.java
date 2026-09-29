@@ -32,6 +32,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.xml.ItemData;
 import ext.mods.gameserver.enums.items.ItemLocation;
@@ -149,7 +150,7 @@ public class CreateItemDialog extends JDialog {
 	}
 
 	public static void giveItemToOfflinePlayer(String playername, int id, int count, int enchantLevel, ItemLocation location) {
-		try (Connection con = ConnectionPool.getConnection(); PreparedStatement selectStatement = con.prepareStatement("SELECT obj_Id FROM characters WHERE char_name=?"); PreparedStatement insertStatement = con.prepareStatement("INSERT INTO items (owner_id,item_id,count,loc,loc_data,enchant_level,object_id,custom_type1,custom_type2,mana_left,time) VALUES (?,?,?,?,?,?,?,?,?,?,?)")) {
+		try (Connection con = DatabaseConnection.open(); PreparedStatement selectStatement = con.prepareStatement("SELECT obj_Id FROM characters WHERE char_name=?"); PreparedStatement insertStatement = con.prepareStatement("INSERT INTO items (owner_id,item_id,count,loc,loc_data,enchant_level,object_id,custom_type1,custom_type2,mana_left,time) VALUES (?,?,?,?,?,?,?,?,?,?,?)")) {
 
 			Item item = ItemData.getInstance().getTemplate(id);
 			int objectId = IdFactory.getInstance().getNextId();

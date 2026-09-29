@@ -45,6 +45,7 @@ import ext.mods.commons.geometry.Polygon;
 import ext.mods.commons.geometry.Territory;
 import ext.mods.commons.geometry.Triangle;
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.xml.NpcData;
 import ext.mods.gameserver.enums.CabalType;
@@ -293,7 +294,7 @@ public class SpawnManager implements IXmlReader
 		_makers.stream().map(NpcMaker::getSpawns).flatMap(List::stream).forEach(MultiSpawn::updateSpawnData);
 		_spawns.forEach(Spawn::updateSpawnData);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement delete = con.prepareStatement(TRUNCATE_SPAWN_DATAS);
 			PreparedStatement ps = con.prepareStatement(SAVE_SPAWN_DATAS))
 		{
@@ -327,7 +328,7 @@ public class SpawnManager implements IXmlReader
 	
 	public void save(SpawnData data)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_SPAWN_DATAS))
 		{
 			byte status = data.getStatus();
@@ -358,7 +359,7 @@ public class SpawnManager implements IXmlReader
 	 */
 	private final void loadSpawnData()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(LOAD_SPAWN_DATAS);
 			ResultSet rs = ps.executeQuery();)
 		{

@@ -20,6 +20,7 @@ package ext.mods.email.items;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.model.item.instance.ItemInstance;
@@ -29,7 +30,7 @@ public class EmailStorage
 	
 	public static void saveEmail(int emailId, int senderId, int targetId, ItemInstance item, boolean isPaid, int paymentItemId, int paymentItemCount, long expirationTime)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try (Connection con = DatabaseConnection.open())
 		{
 			PreparedStatement ps = con.prepareStatement("INSERT INTO player_emails (email_id, sender_id, target_id, item_object_id, item_id, count, enchant_level, is_augmented, augment_id, is_paid, payment_item_id, payment_item_count, expiration_time, created_time) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			

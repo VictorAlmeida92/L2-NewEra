@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 public class DropSkipManager
@@ -55,7 +56,7 @@ public class DropSkipManager
 	
 	private void insertToDb(int playerId, int itemId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("INSERT IGNORE INTO player_droplist_config (player_id, item_id) VALUES (?, ?)"))
 		{
 			ps.setInt(1, playerId);
@@ -70,7 +71,7 @@ public class DropSkipManager
 	
 	private void removeFromDb(int playerId, int itemId)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("DELETE FROM player_droplist_config WHERE player_id = ? AND item_id = ?"))
 		{
 			ps.setInt(1, playerId);
@@ -86,7 +87,7 @@ public class DropSkipManager
 	public void loadPlayer(int playerId)
 	{
 		Set<Integer> items = new HashSet<>();
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement("SELECT item_id FROM player_droplist_config WHERE player_id = ?"))
 		{
 			ps.setInt(1, playerId);

@@ -2,7 +2,7 @@ package ext.mods.gameapi.db
 
 import ext.mods.commons.crypt.BCrypt
 import ext.mods.commons.jdbc.DatabaseDialect
-import ext.mods.commons.pool.ConnectionPool
+import ext.mods.commons.jdbc.DatabaseConnection
 import ext.mods.gameapi.GameApiConfig
 import java.sql.Connection
 import java.util.ArrayDeque
@@ -165,7 +165,7 @@ object SiteApiRepository {
         val passwordString = String(password)
         val hash = BCrypt.hashPw(passwordString)
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 if (accountExists(con, login)) return RegisterResult.DUPLICATE
                 con.prepareStatement(
                     """
@@ -188,7 +188,7 @@ object SiteApiRepository {
     fun login(login: String, password: CharArray): AccountLoginResult {
         val passwordString = String(password)
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement("SELECT password, access_level, last_server FROM accounts WHERE login=?").use { ps ->
                     ps.setString(1, login)
                     ps.executeQuery().use { rs ->
@@ -217,7 +217,7 @@ object SiteApiRepository {
         val currentPasswordString = String(currentPassword)
         val newPasswordString = String(newPassword)
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement("SELECT password FROM accounts WHERE login=?").use { ps ->
                     ps.setString(1, login)
                     ps.executeQuery().use { rs ->
@@ -255,7 +255,7 @@ object SiteApiRepository {
     fun resetPassword(login: String, newPassword: CharArray): ChangePasswordResult {
         val newPasswordString = String(newPassword)
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement("SELECT password FROM accounts WHERE login=?").use { ps ->
                     ps.setString(1, login)
                     ps.executeQuery().use { rs ->
@@ -294,7 +294,7 @@ object SiteApiRepository {
     fun getHardwareCredentials(login: String): List<HardwareCredentialRecord> {
         val list = mutableListOf<HardwareCredentialRecord>()
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement(
                     """
                     SELECT credential_id, public_key_der, algorithm, device_name, sign_count, created_at, last_used_at
@@ -336,7 +336,7 @@ object SiteApiRepository {
         val now = System.currentTimeMillis()
         val cleanLogin = login.trim().lowercase()
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement(
                     DatabaseDialect.upsert(
                         "accounts_hardware_guard",
@@ -364,7 +364,7 @@ object SiteApiRepository {
 
     fun removeHardwareCredentials(login: String): Boolean {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement("DELETE FROM accounts_hardware_guard WHERE login=?").use { ps ->
                     ps.setString(1, login.trim().lowercase())
                     ps.executeUpdate() >= 0
@@ -378,7 +378,7 @@ object SiteApiRepository {
     fun updateHardwareSignCount(login: String, credentialId: String, newSignCount: Long): Boolean {
         val now = System.currentTimeMillis()
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement(
                     "UPDATE accounts_hardware_guard SET sign_count=?, last_used_at=? WHERE login=? AND credential_id=?"
                 ).use { ps ->
@@ -417,7 +417,7 @@ object SiteApiRepository {
 
     fun accountCharacters(login: String): AccountCharactersResponse {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val characters = loadAccountCharacters(con, login)
                 val renameItemTotal = countAccountItem(con, login, GameApiConfig.accountRenameItemId)
                 val pkResetItemTotal = countAccountItem(con, login, GameApiConfig.accountPkResetItemId)
@@ -456,7 +456,7 @@ object SiteApiRepository {
         }
         val itemId = GameApiConfig.accountRenameItemId
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedCharacterForRename(con, login, characterId)
@@ -499,7 +499,7 @@ object SiteApiRepository {
     fun resetPkAndKarma(login: String, characterId: Int): PkResetResult {
         val itemId = GameApiConfig.accountPkResetItemId
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedCharacterForPkReset(con, login, characterId)
@@ -542,7 +542,7 @@ object SiteApiRepository {
         val z = GameApiConfig.accountPlayerResetZ
         val instanceId = GameApiConfig.accountPlayerResetInstanceId
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 var current = loadOwnedCharacterForPlayerReset(con, login, characterId)
                     ?: return@use PlayerResetResult(false, "Personagem inválido para esta conta.", itemId = itemId, characterId = characterId, x = x, y = y, z = z, instanceId = instanceId)
                 var kicked = false
@@ -596,7 +596,7 @@ object SiteApiRepository {
 
     fun validateClanService(login: String, characterId: Int, serviceId: String): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 // Load character + clan
                 val charRow = con.prepareStatement(
                     """
@@ -713,7 +713,7 @@ object SiteApiRepository {
         val itemId = GameApiConfig.accountClanRenameItemId
         val amount = GameApiConfig.accountClanRenameItemAmount
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -766,7 +766,7 @@ object SiteApiRepository {
 
     fun getClanAllianceInfo(login: String, characterId: Int): ClanAllianceInfoResult {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val sql = """
                     SELECT c.obj_Id,
                            c.char_name,
@@ -842,7 +842,7 @@ object SiteApiRepository {
 
     fun getClanMembersForTransfer(login: String, characterId: Int): ClanMembersResponse {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val leaderCheckSql = """
                     SELECT c.obj_Id, c.char_name, cd.clan_id, cd.clan_name, cd.leader_id
                     FROM characters c
@@ -924,7 +924,7 @@ object SiteApiRepository {
         val itemId = GameApiConfig.accountClanRenameAllyItemId
         val amount = 1L
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1009,7 +1009,7 @@ object SiteApiRepository {
         val itemId = GameApiConfig.accountClanLevelUpItemId
         val amount = 1L
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1075,7 +1075,7 @@ object SiteApiRepository {
         val itemId = GameApiConfig.accountClanLevelDownItemId
         val amount = 1L
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1149,7 +1149,7 @@ object SiteApiRepository {
         val itemId = GameApiConfig.accountClanTransferLeaderItemId
         val amount = 1L
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1219,7 +1219,7 @@ object SiteApiRepository {
         val amount = 1L
         val expiry = System.currentTimeMillis() + 86400000L
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1283,7 +1283,7 @@ object SiteApiRepository {
 
     fun listRoyalGuards(login: String, characterId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanLeaderForRename(con, login, characterId)
                     ?: return@use mapOf("ok" to false, "message" to "Personagem inválido, sem clan ou sem liderança para esta conta.", "characterId" to characterId)
 
@@ -1385,7 +1385,7 @@ object SiteApiRepository {
 
     fun listCastleSiege(login: String, characterId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val charRow = con.prepareStatement(
                     """
                     SELECT c.obj_Id, c.char_name, COALESCE(c.clanid, 0) AS clanid,
@@ -1618,7 +1618,7 @@ object SiteApiRepository {
 
     fun moveRoyalGuardMember(login: String, characterId: Int, targetCharacterId: Int, targetSubPledgeId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1658,7 +1658,7 @@ object SiteApiRepository {
     fun createRoyalGuard(login: String, characterId: Int, name: String): Map<String, Any?> {
         val safeName = name.trim()
         if (!ROYAL_NAME_REGEX.matches(safeName)) return mapOf("ok" to false, "message" to "Nome da Royal inválido: use 3-45 letras, números ou espaço.")
-        return try { ConnectionPool.getConnection().use { con ->
+        return try { DatabaseConnection.open().use { con ->
             con.autoCommit = false
             try {
                 val current = loadOwnedClanLeaderForRename(con, login, characterId) ?: return@use rollback(con, mapOf("ok" to false, "message" to "Personagem inválido, sem clan ou sem liderança."))
@@ -1681,7 +1681,7 @@ object SiteApiRepository {
     fun deleteRoyalGuard(login: String, characterId: Int, subPledgeId: Int, moveToSubPledgeId: Int): Map<String, Any?> {
         if (subPledgeId == 0 || subPledgeId == -1) return mapOf("ok" to false, "message" to "Esta ordem não pode ser deletada.")
         if (subPledgeId == moveToSubPledgeId) return mapOf("ok" to false, "message" to "Escolha uma ordem diferente para mover os membros.")
-        return try { ConnectionPool.getConnection().use { con ->
+        return try { DatabaseConnection.open().use { con ->
             con.autoCommit = false
             try {
                 val current = loadOwnedClanLeaderForRename(con, login, characterId) ?: return@use rollback(con, mapOf("ok" to false, "message" to "Personagem inválido, sem clan ou sem liderança."))
@@ -1710,7 +1710,7 @@ object SiteApiRepository {
             return mapOf("ok" to false, "message" to "Nome da ordem/subpledge inválido: use 3-45 letras, números ou espaço.")
         }
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1768,7 +1768,7 @@ object SiteApiRepository {
             return mapOf("ok" to false, "message" to "O Clan Principal é liderado pelo Líder do Clan.")
         }
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1816,7 +1816,7 @@ object SiteApiRepository {
     fun removeRoyalGuardCaptain(login: String, characterId: Int, subPledgeId: Int): Map<String, Any?> {
         if (subPledgeId == 0) return mapOf("ok" to false, "message" to "Ordem inválida.")
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -1849,7 +1849,7 @@ object SiteApiRepository {
 
     fun getClanInviteCandidates(login: String, characterId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanLeaderForRename(con, login, characterId)
                     ?: return mapOf("ok" to false, "message" to "Personagem inválido, sem clan ou sem liderança.")
 
@@ -1916,7 +1916,7 @@ object SiteApiRepository {
 
     fun sendClanInvite(login: String, characterId: Int, targetCharacterId: Int, targetSubPledgeId: Int = 0): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanLeaderForRename(con, login, characterId)
                 if (current == null) {
                     return mapOf("ok" to false, "message" to "Personagem inválido, sem clan ou você não é o líder principal do clan.")
@@ -2050,7 +2050,7 @@ object SiteApiRepository {
     }
 
     fun clanChat(login: String, characterId: Int, since: Long): Map<String, Any?> {
-        return try { ConnectionPool.getConnection().use { con ->
+        return try { DatabaseConnection.open().use { con ->
             val member = loadOwnedClanMemberForChat(con, login, characterId) ?: return@use mapOf("ok" to false, "message" to "Personagem inválido ou sem clan para esta conta.")
             val sinceSafe = since.coerceAtLeast(0L)
             val messages = ext.mods.gameapi.clan.ClanChatRing.fetchSince(member.clanId, sinceSafe)
@@ -2062,7 +2062,7 @@ object SiteApiRepository {
     fun sendClanChat(login: String, characterId: Int, text: String): Map<String, Any?> {
         val safeText = sanitizeChatText(text)
         if (safeText.isBlank()) return mapOf("ok" to false, "message" to "Mensagem vazia.")
-        return try { ConnectionPool.getConnection().use { con ->
+        return try { DatabaseConnection.open().use { con ->
             val member = loadOwnedClanMemberForChat(con, login, characterId) ?: return@use mapOf("ok" to false, "message" to "Personagem inválido ou sem clan para esta conta.")
             val role = determineClanRole(con, member.clanId, member.characterId)
 
@@ -2085,7 +2085,7 @@ object SiteApiRepository {
 
     fun getClanWars(login: String, characterId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanMemberForWar(con, login, characterId)
                 val clanId = current?.clanId ?: 0
                 val now = System.currentTimeMillis()
@@ -2415,7 +2415,7 @@ object SiteApiRepository {
         }
 
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanMemberForWar(con, login, characterId)
                     ?: return mapOf("ok" to false, "message" to "Personagem inválido ou não pertence a um clan.")
 
@@ -2540,7 +2540,7 @@ object SiteApiRepository {
 
     fun stopClanWar(login: String, characterId: Int, targetClanId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanMemberForWar(con, login, characterId)
                     ?: return mapOf("ok" to false, "message" to "Personagem inválido ou não pertence a um clan.")
 
@@ -2596,7 +2596,7 @@ object SiteApiRepository {
         val actionType = type.uppercase().trim()
 
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanLeaderForRename(con, login, characterId)
@@ -2873,7 +2873,7 @@ object SiteApiRepository {
                 val typed = map as? MutableMap<Int, Any>
                 typed?.clear()
                 val subPledgeClass = Class.forName("ext.mods.gameserver.model.pledge.SubPledge")
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     con.prepareStatement("SELECT sub_pledge_id, name, leader_id FROM clan_subpledges WHERE clan_id=?").use { ps ->
                         ps.setInt(1, clanId)
                         ps.executeQuery().use { rs ->
@@ -3429,7 +3429,7 @@ object SiteApiRepository {
             ORDER BY score DESC, c.level DESC, c.char_name ASC
             LIMIT ?
         """.trimIndent()
-        return ConnectionPool.getConnection().use { con ->
+        return DatabaseConnection.open().use { con ->
             con.prepareStatement(sql).use { ps ->
                 ps.setInt(1, limit.coerceIn(1, 100))
                 ps.executeQuery().use { rs ->
@@ -3465,7 +3465,7 @@ object SiteApiRepository {
             ORDER BY reputation DESC, level DESC, cd.clan_name ASC
             LIMIT ?
         """.trimIndent()
-        return ConnectionPool.getConnection().use { con ->
+        return DatabaseConnection.open().use { con ->
             con.prepareStatement(sql).use { ps ->
                 ps.setInt(1, limit.coerceIn(1, 100))
                 ps.executeQuery().use { rs ->
@@ -3582,7 +3582,7 @@ object SiteApiRepository {
 
     fun getClanSkillsServiceData(login: String, characterId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanMemberForSkills(con, login, characterId)
                     ?: return mapOf("ok" to false, "message" to "Personagem não encontrado ou não pertence a um clan.")
 
@@ -3701,7 +3701,7 @@ object SiteApiRepository {
 
     fun buyClanSkillService(login: String, characterId: Int, skillId: Int): Map<String, Any?> {
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.autoCommit = false
                 try {
                     val current = loadOwnedClanMemberForSkills(con, login, characterId)
@@ -3814,7 +3814,7 @@ object SiteApiRepository {
     fun donateClanReputation(login: String, characterId: Int, count: Int): Map<String, Any?> {
         val qty = count.coerceIn(1, 100)
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 val current = loadOwnedClanMemberForSkills(con, login, characterId)
                     ?: return mapOf("ok" to false, "message" to "Personagem não encontrado ou não pertence a um clan.")
 
@@ -4079,7 +4079,7 @@ object SiteApiRepository {
         var lastRatingTime: Long? = null
 
         try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 ensureVoteTable(con)
 
                 // Query vote cooldown (event_type = 'vote' or empty)
@@ -4200,7 +4200,7 @@ object SiteApiRepository {
         var charPlaytime = 0
 
         try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 ensureVoteTable(con)
                 if (resolvedId > 0) {
                     con.prepareStatement("SELECT obj_Id, char_name, account_name, level, onlinetime FROM characters WHERE obj_Id=?").use { ps ->
@@ -4360,7 +4360,7 @@ object SiteApiRepository {
 
         // 1. Deduplication check on unique delivery_id
         try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 ensureVoteTable(con)
                 con.prepareStatement("SELECT id, player_name, status FROM site_vote_logs WHERE delivery_id = ?").use { ps ->
                     ps.setString(1, deliveryId)
@@ -4480,7 +4480,7 @@ object SiteApiRepository {
         // 2.3 Check directly by character name (case-insensitive)
         if (targetCharName == null && !charNameOrTrack.isNullOrBlank()) {
             try {
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     con.prepareStatement("SELECT obj_Id, char_name, account_name, level, onlinetime FROM characters WHERE LOWER(char_name) = LOWER(?)").use { ps ->
                         ps.setString(1, charNameOrTrack.trim())
                         ps.executeQuery().use { rs ->
@@ -4500,7 +4500,7 @@ object SiteApiRepository {
         // 2.4 Check directly by account name (highest level character on account)
         if (targetCharName == null && !charNameOrTrack.isNullOrBlank()) {
             try {
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     con.prepareStatement("SELECT obj_Id, char_name, account_name, level, onlinetime FROM characters WHERE LOWER(account_name) = LOWER(?) ORDER BY level DESC LIMIT 1").use { ps ->
                         ps.setString(1, charNameOrTrack.trim())
                         ps.executeQuery().use { rs ->
@@ -4530,7 +4530,7 @@ object SiteApiRepository {
         // 2.6 Fallback: query online character with activity
         if (targetCharName == null) {
             try {
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     con.prepareStatement("SELECT obj_Id, char_name, account_name, level, onlinetime FROM characters WHERE online=1 ORDER BY level DESC LIMIT 1").use { ps ->
                         ps.executeQuery().use { rs ->
                             if (rs.next()) {
@@ -4549,7 +4549,7 @@ object SiteApiRepository {
         // If target was found via intent but char level/playtime isn't loaded yet, load it now
         if (targetCharId > 0 && targetCharLevel == 0) {
             try {
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     con.prepareStatement("SELECT level, onlinetime FROM characters WHERE obj_Id=?").use { ps ->
                         ps.setInt(1, targetCharId)
                         ps.executeQuery().use { rs ->
@@ -4621,7 +4621,7 @@ object SiteApiRepository {
 
             var isCooldownActive = false
             try {
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     val sql = if (targetHwid.isNotBlank()) {
                         "SELECT created_at FROM site_vote_logs WHERE (account_name = ? OR ip = ? OR (hwid != '' AND hwid = ?)) AND (event_type = 'vote' OR event_type = '' OR event_type IS NULL) AND status = 'DELIVERED' ORDER BY created_at DESC LIMIT 1"
                     } else {
@@ -4661,7 +4661,7 @@ object SiteApiRepository {
 
             var isRatingUsed = false
             try {
-                ConnectionPool.getConnection().use { con ->
+                DatabaseConnection.open().use { con ->
                     val sql = if (targetHwid.isNotBlank()) {
                         "SELECT created_at FROM site_vote_logs WHERE (account_name = ? OR ip = ? OR (hwid != '' AND hwid = ?)) AND event_type = 'rating' AND status = 'DELIVERED' ORDER BY created_at DESC LIMIT 1"
                     } else {
@@ -4792,7 +4792,7 @@ object SiteApiRepository {
         status: String
     ) {
         try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 ensureVoteTable(con)
                 con.prepareStatement(
                     """
@@ -4902,7 +4902,7 @@ object SiteApiRepository {
         if (accountName.isBlank()) return emptyList()
         val list = mutableListOf<ShopPurchaseRecord>()
         try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 ensureShopPurchasesTable(con)
                 con.prepareStatement(
                     """
@@ -5026,7 +5026,7 @@ object SiteApiRepository {
     }
 
     private fun deliverOfflineItem(targetCharId: Int, itemId: Int, count: Long) {
-        ConnectionPool.getConnection().use { con ->
+        DatabaseConnection.open().use { con ->
             con.autoCommit = false
             try {
                 deliverOfflineItem(con, targetCharId, itemId, count)
@@ -5044,7 +5044,7 @@ object SiteApiRepository {
     fun ownsCharacter(login: String, characterId: Int): Boolean {
         if (login.isBlank() || characterId <= 0) return false
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 con.prepareStatement(
                     "SELECT 1 FROM characters WHERE obj_Id=? AND account_name=? AND COALESCE(deletetime, 0)=0 LIMIT 1"
                 ).use { ps ->
@@ -5093,7 +5093,7 @@ object SiteApiRepository {
         }.getOrNull() ?: 4037
 
         return try {
-            ConnectionPool.getConnection().use { con ->
+            DatabaseConnection.open().use { con ->
                 ensureShopPurchasesTable(con)
                 con.autoCommit = false
                 try {

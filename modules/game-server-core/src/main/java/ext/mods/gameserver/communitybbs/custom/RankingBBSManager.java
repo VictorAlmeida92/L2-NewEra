@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.util.stream.IntStream;
 
 import ext.mods.commons.lang.StringUtil;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 
 import ext.mods.gameserver.communitybbs.manager.BaseBBSManager;
@@ -68,7 +69,7 @@ public class RankingBBSManager extends BaseBBSManager
 			PKS.setLength(0);
 			CLAN.setLength(0);
 			
-			try (Connection con = ConnectionPool.getConnection())
+			try (Connection con = DatabaseConnection.open())
 			{
 				try (PreparedStatement ps = con.prepareStatement("SELECT char_name, pvpkills FROM characters WHERE pvpkills > 0 ORDER BY pvpkills DESC LIMIT " + PAGE_LIMIT_5);
 					ResultSet rs = ps.executeQuery())
@@ -111,7 +112,7 @@ public class RankingBBSManager extends BaseBBSManager
 				LOGGER.warn("There was problem while updating ranking system.", e);
 			}
 			
-			try (Connection con = ConnectionPool.getConnection())
+			try (Connection con = DatabaseConnection.open())
 			{
 				try (PreparedStatement ps = con.prepareStatement("SELECT clan_id, clan_name, clan_level, reputation_score, leader_id, hasCastle, crest_id FROM clan_data WHERE clan_level > 0 ORDER BY reputation_score DESC LIMIT " + PAGE_LIMIT_5);
 					ResultSet rs = ps.executeQuery())

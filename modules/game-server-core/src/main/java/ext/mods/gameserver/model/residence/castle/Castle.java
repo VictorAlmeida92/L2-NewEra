@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -248,7 +249,7 @@ public class Castle extends Residence
 		
 		if (save)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_TREASURY))
 			{
 				ps.setLong(1, _treasury);
@@ -283,7 +284,7 @@ public class Castle extends Residence
 			else
 				_taxRevenue += amount;
 			
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_TAX_REVENUE))
 			{
 				ps.setLong(1, _taxRevenue);
@@ -312,7 +313,7 @@ public class Castle extends Residence
 			else
 				_seedIncome += amount;
 			
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_SEED_INCOME))
 			{
 				ps.setLong(1, _seedIncome);
@@ -343,7 +344,7 @@ public class Castle extends Residence
 	 */
 	public void updateTaxes()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_TAXES))
 		{
 			if (isFree())
@@ -426,7 +427,7 @@ public class Castle extends Residence
 		
 		if (storeInDb)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_CERTIFICATES))
 			{
 				ps.setInt(1, leftCertificates);
@@ -520,7 +521,7 @@ public class Castle extends Residence
 		
 		if (save)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_CURRENT_TAX))
 			{
 				ps.setInt(1, value);
@@ -543,7 +544,7 @@ public class Castle extends Residence
 		
 		if (save)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_NEXT_TAX))
 			{
 				ps.setInt(1, value);
@@ -590,7 +591,7 @@ public class Castle extends Residence
 		
 		if (db)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("castle_doorupgrade", "doorId,hp,castleId", "?,?,?", "doorId", "hp,castleId")))
 			{
 				ps.setInt(1, doorId);
@@ -613,7 +614,7 @@ public class Castle extends Residence
 		for (Door door : _doors)
 			door.getStatus().setUpgradeHpRatio(1);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_DOOR))
 		{
 			ps.setInt(1, _id);
@@ -648,7 +649,7 @@ public class Castle extends Residence
 			setCurrentTaxPercent(getDefaultTaxRate(), false);
 			setNextTaxPercent(getDefaultTaxRate(), false);
 			
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_TAXES))
 			{
 				ps.setLong(1, _treasury);
@@ -665,7 +666,7 @@ public class Castle extends Residence
 			}
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_OLD_OWNER);
 			PreparedStatement ps2 = con.prepareStatement(UPDATE_NEW_OWNER))
 		{
@@ -928,7 +929,7 @@ public class Castle extends Residence
 	{
 		if (save)
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(DatabaseDialect.upsert("castle_trapupgrade", "castleId,towerIndex,level", "?,?,?", "towerIndex,castleId", "level")))
 			{
 				ps.setInt(1, _id);
@@ -955,7 +956,7 @@ public class Castle extends Residence
 		for (TowerSpawnLocation ts : _controlTowers)
 			ts.setUpgradeLevel(0);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(DELETE_TRAP))
 		{
 			ps.setInt(1, _id);
@@ -974,7 +975,7 @@ public class Castle extends Residence
 			player.checkItemRestriction();
 		else
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement ps = con.prepareStatement(UPDATE_ITEMS_LOC))
 			{
 				ps.setInt(1, _circletId);
@@ -990,7 +991,7 @@ public class Castle extends Residence
 	
 	public void checkItemsForClan(Clan clan)
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement ps = con.prepareStatement(UPDATE_ITEMS_LOC))
 		{
 			ps.setInt(1, _circletId);
@@ -1016,7 +1017,7 @@ public class Castle extends Residence
 	
 	private void loadFunctions()
 	{
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement statement = con.prepareStatement(LOAD_FUNCTIONS))
 		{
 			statement.setInt(1, _id);
@@ -1038,7 +1039,7 @@ public class Castle extends Residence
 	public void removeFunction(int functionType)
 	{
 		_function.remove(functionType);
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement statement = con.prepareStatement(DELETE_FUNCTIONS))
 		{
 			statement.setInt(1, getOwnerId());
@@ -1201,7 +1202,7 @@ public class Castle extends Residence
 		
 		public void dbSave()
 		{
-			try (Connection con = ConnectionPool.getConnection();
+			try (Connection con = DatabaseConnection.open();
 				PreparedStatement statement = con.prepareStatement(DatabaseDialect.upsert("castle_functions", "castle_id,type,lvl,lease,rate,endTime", "?,?,?,?,?,?", "castle_id,type", "lvl,lease,rate,endTime")))
 			{
 				statement.setInt(1, getId());

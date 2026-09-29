@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ext.mods.commons.logging.CLogger;
+import ext.mods.commons.jdbc.DatabaseConnection;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.commons.pool.ThreadPool;
 
@@ -54,7 +55,7 @@ public final class ItemsOnGroundTaskManager implements Runnable
 	{
 		ThreadPool.scheduleAtFixedRate(this, 15000, 15000);
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement st = con.prepareStatement(LOAD_ITEMS);
 			PreparedStatement st2 = con.prepareStatement(TRUNCATE_ITEMS);
 			ResultSet rs = st.executeQuery())
@@ -160,7 +161,7 @@ public final class ItemsOnGroundTaskManager implements Runnable
 			return;
 		}
 		
-		try (Connection con = ConnectionPool.getConnection();
+		try (Connection con = DatabaseConnection.open();
 			PreparedStatement st = con.prepareStatement(SAVE_ITEMS))
 		{
 			final long time = System.currentTimeMillis();
