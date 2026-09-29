@@ -1,16 +1,17 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcGameServerRegistrationStore;
 import ext.mods.gameserver.data.repository.GameServerRegistration;
 import ext.mods.gameserver.data.repository.GameServerRegistrationStore;
 
 /** Application boundary for LoginServer gameserver registration persistence. */
 public final class GameServerRegistrationPersistenceService
 {
-	private static final GameServerRegistrationStore STORE = new JdbcGameServerRegistrationStore();
+	private static final GameServerRegistrationStore STORE = PersistenceRegistry.gameServerRegistration();
 
 	private GameServerRegistrationPersistenceService()
 	{

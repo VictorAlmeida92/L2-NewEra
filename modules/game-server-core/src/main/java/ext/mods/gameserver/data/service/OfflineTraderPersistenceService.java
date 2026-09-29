@@ -1,16 +1,17 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcOfflineTraderStore;
 import ext.mods.gameserver.data.repository.OfflineTraderData;
 import ext.mods.gameserver.data.repository.OfflineTraderStore;
 
 /** Application boundary for offline trader persistence. */
 public final class OfflineTraderPersistenceService
 {
-	private static final OfflineTraderStore STORE = new JdbcOfflineTraderStore();
+	private static final OfflineTraderStore STORE = PersistenceRegistry.offlineTraders();
 
 	private OfflineTraderPersistenceService()
 	{

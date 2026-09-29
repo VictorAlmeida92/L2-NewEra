@@ -1,16 +1,17 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcCharacterSelectionStore;
 import ext.mods.gameserver.data.repository.CharacterSelection;
 import ext.mods.gameserver.data.repository.CharacterSelectionStore;
 
 /** Application boundary for the character-selection read model. */
 public final class CharacterSelectionPersistenceService
 {
-	private static final CharacterSelectionStore STORE = new JdbcCharacterSelectionStore();
+	private static final CharacterSelectionStore STORE = PersistenceRegistry.characterSelection();
 
 	private CharacterSelectionPersistenceService()
 	{

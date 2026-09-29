@@ -17,6 +17,8 @@
  */
 package ext.mods.gameserver.data.sql;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +32,6 @@ import ext.mods.commons.pool.ThreadPool;
 import ext.mods.Config;
 import ext.mods.gameserver.data.manager.CastleManager;
 import ext.mods.gameserver.data.manager.ClanHallManager;
-import ext.mods.gameserver.data.adapter.JdbcClanStore;
 import ext.mods.gameserver.data.repository.ClanStore;
 import ext.mods.gameserver.idfactory.IdFactory;
 import ext.mods.gameserver.model.actor.Player;
@@ -55,7 +56,7 @@ public class ClanTable
 	
 	protected ClanTable()
 	{
-		this(new JdbcClanStore());
+		this(PersistenceRegistry.clans());
 	}
 
 	ClanTable(ClanStore store)

@@ -17,6 +17,8 @@
  */
 package ext.mods.gameserver.data.manager;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,6 @@ import ext.mods.commons.data.xml.IXmlReader;
 import ext.mods.commons.lang.StringUtil;
 import ext.mods.Config;
 import ext.mods.gameserver.data.SkillTable;
-import ext.mods.gameserver.data.adapter.JdbcBufferSchemeStore;
 import ext.mods.gameserver.data.repository.BufferSchemeStore;
 import ext.mods.gameserver.model.World;
 import ext.mods.gameserver.model.actor.Creature;
@@ -64,7 +65,7 @@ public class BufferManager implements IXmlReader
 	
 	protected BufferManager()
 	{
-		this(new JdbcBufferSchemeStore());
+		this(PersistenceRegistry.bufferSchemes());
 	}
 
 	BufferManager(BufferSchemeStore store)

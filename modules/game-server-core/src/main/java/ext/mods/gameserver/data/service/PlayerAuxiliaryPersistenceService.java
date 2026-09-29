@@ -1,10 +1,11 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcPlayerAuxiliaryStore;
 import ext.mods.gameserver.data.repository.HennaRecord;
 import ext.mods.gameserver.data.repository.MacroRecord;
 import ext.mods.gameserver.data.repository.MemoRecord;
@@ -15,7 +16,7 @@ import ext.mods.gameserver.data.repository.ShortcutRecord;
 /** Application boundary for character-owned auxiliary state. */
 public final class PlayerAuxiliaryPersistenceService
 {
-	private static final PlayerAuxiliaryStore STORE = new JdbcPlayerAuxiliaryStore();
+	private static final PlayerAuxiliaryStore STORE = PersistenceRegistry.playerAuxiliary();
 
 	private PlayerAuxiliaryPersistenceService()
 	{

@@ -1,17 +1,18 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcSubclassStore;
 import ext.mods.gameserver.data.repository.SubclassRecord;
 import ext.mods.gameserver.data.repository.SubclassStore;
 
 /** Application boundary for player subclass persistence. */
 public final class SubclassPersistenceService
 {
-	private static final SubclassStore STORE = new JdbcSubclassStore();
+	private static final SubclassStore STORE = PersistenceRegistry.subclasses();
 
 	private SubclassPersistenceService()
 	{

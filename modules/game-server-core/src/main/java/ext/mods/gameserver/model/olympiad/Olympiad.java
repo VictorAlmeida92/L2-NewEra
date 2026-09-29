@@ -17,6 +17,8 @@
  */
 package ext.mods.gameserver.model.olympiad;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -34,7 +36,6 @@ import ext.mods.commons.pool.ThreadPool;
 import ext.mods.gameserver.data.manager.AntiFeedManager;
 import ext.mods.gameserver.data.manager.HeroManager;
 import ext.mods.gameserver.data.manager.ZoneManager;
-import ext.mods.gameserver.data.adapter.JdbcOlympiadStore;
 import ext.mods.gameserver.data.repository.OlympiadStore;
 import ext.mods.gameserver.enums.OlympiadState;
 import ext.mods.gameserver.enums.OlympiadType;
@@ -86,7 +87,7 @@ public class Olympiad
 	
 	protected Olympiad()
 	{
-		this(new JdbcOlympiadStore());
+		this(PersistenceRegistry.olympiad());
 	}
 
 	Olympiad(OlympiadStore store)

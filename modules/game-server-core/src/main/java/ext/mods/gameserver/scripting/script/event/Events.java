@@ -17,7 +17,8 @@
  */
 package ext.mods.gameserver.scripting.script.event;
 
-import ext.mods.gameserver.data.adapter.JdbcCustomEventStateStore;
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import ext.mods.gameserver.data.repository.CustomEventStateStore;
 import ext.mods.gameserver.scripting.Quest;
 
@@ -27,7 +28,7 @@ public abstract class Events extends Quest
 	
 	public Events()
 	{
-		this(new JdbcCustomEventStateStore());
+		this(PersistenceRegistry.customEvents());
 	}
 
 	protected Events(CustomEventStateStore stateStore)

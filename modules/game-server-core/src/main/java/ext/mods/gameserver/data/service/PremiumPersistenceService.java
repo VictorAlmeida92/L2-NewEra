@@ -1,15 +1,16 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.Optional;
 
-import ext.mods.gameserver.data.adapter.JdbcPremiumStore;
 import ext.mods.gameserver.data.repository.PremiumStore;
 
 /** Application boundary for account premium persistence. */
 public final class PremiumPersistenceService
 {
-	private static final PremiumStore STORE = new JdbcPremiumStore();
+	private static final PremiumStore STORE = PersistenceRegistry.premium();
 
 	private PremiumPersistenceService()
 	{

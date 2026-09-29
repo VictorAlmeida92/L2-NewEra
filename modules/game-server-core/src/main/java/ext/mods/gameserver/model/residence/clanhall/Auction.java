@@ -17,6 +17,8 @@
  */
 package ext.mods.gameserver.model.residence.clanhall;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -25,7 +27,6 @@ import ext.mods.commons.lang.StringUtil;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.pool.ThreadPool;
 
-import ext.mods.gameserver.data.adapter.JdbcClanHallAuctionStore;
 import ext.mods.gameserver.data.repository.ClanHallAuctionStore;
 import ext.mods.gameserver.model.actor.Player;
 import ext.mods.gameserver.model.pledge.Clan;
@@ -78,7 +79,7 @@ public class Auction
 	
 	public Auction(ClanHall ch, int sellerBid, String sellerName, String sellerClanName, long endDate)
 	{
-		this(ch, sellerBid, sellerName, sellerClanName, endDate, new JdbcClanHallAuctionStore());
+		this(ch, sellerBid, sellerName, sellerClanName, endDate, PersistenceRegistry.clanHallAuctions());
 	}
 
 	Auction(ClanHall ch, int sellerBid, String sellerName, String sellerClanName, long endDate, ClanHallAuctionStore store)

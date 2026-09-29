@@ -1,9 +1,10 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 
 import ext.mods.extensions.listener.manager.GameListenerManager;
-import ext.mods.gameserver.data.adapter.JdbcCharacterStore;
 import ext.mods.gameserver.data.repository.CharacterStore;
 import ext.mods.gameserver.data.repository.CharacterState;
 import ext.mods.gameserver.data.repository.CharacterSummary;
@@ -18,7 +19,7 @@ import ext.mods.gameserver.data.sql.PlayerInfoTable;
  */
 public final class CharacterLifecycleService
 {
-	private static final CharacterStore STORE = new JdbcCharacterStore();
+	private static final CharacterStore STORE = PersistenceRegistry.characters();
 
 	private CharacterLifecycleService()
 	{

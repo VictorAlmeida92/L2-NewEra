@@ -166,9 +166,31 @@ tasks.register("checkDatabaseConnectionBoundary") {
     }
 }
 
+tasks.register("checkPersistenceConstructionBoundary") {
+    group = "verification"
+    description = "Blocks direct JDBC adapter construction outside the GameServer composition root"
+
+    doLast {
+        val sourceFiles = rootProject.fileTree("modules/game-server-core/src/main/java/ext/mods/gameserver") {
+            include("**/*.java")
+            exclude("**/data/adapter/**")
+            exclude("**/data/PersistenceRegistry.java")
+        }
+        val findings = sourceFiles.flatMap { file ->
+            file.readLines().mapIndexedNotNull { index, line ->
+                if (Regex("new Jdbc[A-Za-z0-9]+Store\\(").containsMatchIn(line)) "${file.path}:${index + 1}" else null
+            }
+        }
+        if (findings.isNotEmpty())
+            throw GradleException("Direct JDBC adapter construction outside PersistenceRegistry: $findings")
+        logger.lifecycle("Persistence construction boundary scan: clean")
+    }
+}
+
 tasks.named("build") {
     dependsOn("checkDatabaseSql")
     dependsOn("checkDatabaseConnectionBoundary")
+    dependsOn("checkPersistenceConstructionBoundary")
 }
 
 tasks.register("brCompileIncremental") {

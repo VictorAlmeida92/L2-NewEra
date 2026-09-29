@@ -17,13 +17,14 @@
  */
 package ext.mods.gameserver.data.manager;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ext.mods.commons.data.xml.IXmlReader;
-import ext.mods.gameserver.data.adapter.JdbcBuyListStore;
 import ext.mods.gameserver.data.repository.BuyListStore;
 import ext.mods.gameserver.model.buylist.NpcBuyList;
 import ext.mods.gameserver.model.buylist.Product;
@@ -44,7 +45,7 @@ public class BuyListManager implements IXmlReader
 	
 	protected BuyListManager()
 	{
-		this(new JdbcBuyListStore());
+		this(PersistenceRegistry.buyLists());
 	}
 
 	BuyListManager(BuyListStore store)
