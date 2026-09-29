@@ -119,6 +119,12 @@ public abstract class PlayableAI<T extends Playable> extends CreatureAI<T>
 	protected void onEvtFinishedCasting()
 	{
 		final Intention next = consumeNextIntention();
+		if (isStaleCombatIntention(next))
+		{
+			clearStaleCombatTarget();
+			return;
+		}
+
 		if (next == null)
 		{
 			if (_currentIntention.getType() == IntentionType.CAST)
@@ -126,9 +132,9 @@ public abstract class PlayableAI<T extends Playable> extends CreatureAI<T>
 				final L2Skill skill = _currentIntention.getSkill();
 				final Creature target = _currentIntention.getFinalTarget();
 				
-				if (skill.nextActionIsAttack() && target.isAttackableWithoutForceBy(_actor))
+				if (skill != null && target != null && !isStaleCombatTarget(target) && skill.nextActionIsAttack() && target.isAttackableWithoutForceBy(_actor))
 					doAttackIntention(target, _currentIntention.isCtrlPressed(), _currentIntention.isShiftPressed(), true);
-				else if (!skill.isToggle() && ConfigProject.STOP_TOGGLE)
+				else if (skill != null && !skill.isToggle() && ConfigProject.STOP_TOGGLE)
 					doIdleIntention();
 			}
 			else
@@ -142,15 +148,39 @@ public abstract class PlayableAI<T extends Playable> extends CreatureAI<T>
 	protected void onEvtFinishedAttack()
 	{
 		final Intention next = consumeNextIntention();
+		if (isStaleCombatIntention(next))
+		{
+			clearStaleCombatTarget();
+			return;
+		}
+
 		if (next == null)
 		{
-			if (_actor.canKeepAttacking(_currentIntention.getFinalTarget()))
+			if (!isStaleCombatTarget(_currentIntention.getFinalTarget()) && _actor.canKeepAttacking(_currentIntention.getFinalTarget()))
 				notifyEvent(AiEventType.THINK, null, null);
 			else
 				doIdleIntention();
 		}
 		else
 			doIntention(next);
+	}
+
+	static boolean isStaleCombatTarget(Creature target)
+	{
+		return target == null || target.isAlikeDead();
+	}
+
+	static boolean isStaleCombatIntention(Intention intention)
+	{
+		return intention != null && (intention.getType() == IntentionType.ATTACK || intention.getType() == IntentionType.CAST) && isStaleCombatTarget(intention.getFinalTarget());
+	}
+
+	private void clearStaleCombatTarget()
+	{
+		_actor.getMove().cancelFollowTask();
+		_actor.getMove().stop();
+		_actor.setTarget(null);
+		doIdleIntention();
 	}
 	
 	@Override

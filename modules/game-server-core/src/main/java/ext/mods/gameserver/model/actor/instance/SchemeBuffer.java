@@ -231,13 +231,11 @@ public class SchemeBuffer extends Folk
 			premiumSkills(player, skills);
 			if (command.startsWith("skillselect") && !schemeName.equalsIgnoreCase("none"))
 			{
-				if (skills.size() < player.getMaxBuffCount())
-					skills.add(skill);
-				else
+				if (!BufferManager.getInstance().addSkillToScheme(player.getObjectId(), schemeName, skill, player.getMaxBuffCount()))
 					player.sendMessage(player.getSysString(10_180));
 			}
 			else if (command.startsWith("skillunselect"))
-				skills.remove(skill);
+				BufferManager.getInstance().removeSkillFromScheme(player.getObjectId(), schemeName, skill);
 			
 			showEditSchemeWindow(player, groupType, schemeName, page);
 		}
@@ -281,10 +279,7 @@ public class SchemeBuffer extends Folk
 			try
 			{
 				final String schemeName = st.nextToken();
-				final Map<String, ArrayList<L2Skill>> schemes = BufferManager.getInstance().getPlayerSchemes(player.getObjectId());
-				
-				if (schemes != null && schemes.containsKey(schemeName))
-					schemes.remove(schemeName);
+				BufferManager.getInstance().deleteScheme(player.getObjectId(), schemeName);
 			}
 			catch (Exception e)
 			{

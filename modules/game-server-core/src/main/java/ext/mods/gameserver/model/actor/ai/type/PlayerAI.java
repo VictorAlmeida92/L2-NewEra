@@ -231,8 +231,12 @@ public class PlayerAI extends PlayableAI<Player>
     public void thinkAttack()
     {
         final Creature target = _currentIntention.getFinalTarget();
-        if (target == null)
+        if (isStaleCombatTarget(target))
+        {
+            _actor.setTarget(null);
+            doIdleIntention();
             return;
+        }
             
         final boolean isShiftPressed = _currentIntention.isShiftPressed();
         
@@ -250,8 +254,9 @@ public class PlayerAI extends PlayableAI<Player>
             return;
         }
         
-        if (isTargetLost(target))
+        if (isStaleCombatTarget(target) || isTargetLost(target))
         {
+            _actor.setTarget(null);
             doIdleIntention();
             clientActionFailed();
             _actor.sendMessage("Você não pode atacar um alvo perdido");
@@ -367,15 +372,17 @@ public class PlayerAI extends PlayableAI<Player>
         }
         
         final Creature target = _currentIntention.getFinalTarget();
-        if (target == null)
+        if (isStaleCombatTarget(target))
         {
+            _actor.setTarget(null);
             doIdleIntention();
             return;
         }
         
         final L2Skill skill = _currentIntention.getSkill();
-        if (isTargetLost(target, skill))
+        if (isStaleCombatTarget(target) || isTargetLost(target, skill))
         {
+            _actor.setTarget(null);
             doIdleIntention();
             return;
         }

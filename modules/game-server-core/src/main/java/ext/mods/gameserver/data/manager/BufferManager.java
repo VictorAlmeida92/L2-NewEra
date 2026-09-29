@@ -70,8 +70,14 @@ public class BufferManager implements IXmlReader
 
 	BufferManager(BufferSchemeStore store)
 	{
+		this(store, true);
+	}
+
+	BufferManager(BufferSchemeStore store, boolean loadData)
+	{
 		_store = store;
-		load();
+		if (loadData)
+			load();
 	}
 	
 	@Override
@@ -108,7 +114,7 @@ public class BufferManager implements IXmlReader
 						schemeList.add(skill);
 				}
 				
-				setScheme(record.playerId(), record.name(), schemeList);
+				setSchemeInternal(record.playerId(), record.name(), schemeList);
 			}
 		}
 		catch (Exception e)
@@ -154,7 +160,7 @@ public class BufferManager implements IXmlReader
 		});
 	}
 	
-	public void saveSchemes()
+	public synchronized void saveSchemes()
 	{
 		final List<BufferSchemeStore.SchemeRecord> schemes = new ArrayList<>();
 		for (Map.Entry<Integer, Map<String, ArrayList<L2Skill>>> player : _schemesTable.entrySet())
@@ -184,13 +190,59 @@ public class BufferManager implements IXmlReader
 	 * @param schemeName : The {@link String} used as scheme name.
 	 * @param list : The {@link ArrayList} of {@link Integer} used as skill ids.
 	 */
-	public void setScheme(int playerId, String schemeName, ArrayList<L2Skill> list)
+	public synchronized boolean setScheme(int playerId, String schemeName, ArrayList<L2Skill> list)
 	{
 		final Map<String, ArrayList<L2Skill>> schemes = _schemesTable.computeIfAbsent(playerId, s -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		if (schemes.size() >= ConfigNpcs.BUFFER_MAX_SCHEMES)
-			return;
+		if (schemes.size() >= ConfigNpcs.BUFFER_MAX_SCHEMES && !schemes.containsKey(schemeName))
+			return false;
 		
 		schemes.put(schemeName, list);
+		saveSchemes();
+		return true;
+	}
+
+	private void setSchemeInternal(int playerId, String schemeName, ArrayList<L2Skill> list)
+	{
+		final Map<String, ArrayList<L2Skill>> schemes = _schemesTable.computeIfAbsent(playerId, s -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		if (schemes.size() >= ConfigNpcs.BUFFER_MAX_SCHEMES && !schemes.containsKey(schemeName))
+			return;
+
+		schemes.put(schemeName, list);
+	}
+
+	public synchronized boolean addSkillToScheme(int playerId, String schemeName, L2Skill skill, int maxBuffCount)
+	{
+		final Map<String, ArrayList<L2Skill>> schemes = _schemesTable.get(playerId);
+		final ArrayList<L2Skill> scheme = schemes == null ? null : schemes.get(schemeName);
+		if (scheme == null || skill == null || scheme.size() >= maxBuffCount)
+			return false;
+
+		scheme.add(skill);
+		saveSchemes();
+		return true;
+	}
+
+	public synchronized boolean removeSkillFromScheme(int playerId, String schemeName, L2Skill skill)
+	{
+		final Map<String, ArrayList<L2Skill>> schemes = _schemesTable.get(playerId);
+		final ArrayList<L2Skill> scheme = schemes == null ? null : schemes.get(schemeName);
+		if (scheme == null || !scheme.remove(skill))
+			return false;
+
+		saveSchemes();
+		return true;
+	}
+
+	public synchronized boolean deleteScheme(int playerId, String schemeName)
+	{
+		final Map<String, ArrayList<L2Skill>> schemes = _schemesTable.get(playerId);
+		if (schemes == null || schemes.remove(schemeName) == null)
+			return false;
+
+		if (schemes.isEmpty())
+			_schemesTable.remove(playerId);
+		saveSchemes();
+		return true;
 	}
 	
 	/**
@@ -207,18 +259,20 @@ public class BufferManager implements IXmlReader
 	 * @param schemeName : The scheme name to check.
 	 * @return The {@link List} holding {@link L2Skill}s for the given scheme name and Player, or null (if scheme or Player isn't registered).
 	 */
-	public List<L2Skill> getScheme(int playerId, String schemeName)
+	public synchronized List<L2Skill> getScheme(int playerId, String schemeName)
 	{
 		final Player player = World.getInstance().getPlayer(playerId);
 		final Map<String, ArrayList<L2Skill>> schemes = _schemesTable.get(playerId);
 		if (schemes == null)
 			return Collections.emptyList();
 		
-		final ArrayList<L2Skill> scheme = schemes.get(schemeName);
-		if (scheme == null)
+		final ArrayList<L2Skill> storedScheme = schemes.get(schemeName);
+		if (storedScheme == null)
 			return Collections.emptyList();
+
+		final ArrayList<L2Skill> scheme = new ArrayList<>(storedScheme);
 		
-		if (player.getPremiumService() == 0)
+		if (player != null && player.getPremiumService() == 0)
 		{
 			int j = scheme.size();
 			for (int i = 0; i < j; i++)
