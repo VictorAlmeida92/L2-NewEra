@@ -3,10 +3,12 @@ package ext.mods.gameserver.data.adapter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.ClanStore;
@@ -128,11 +130,9 @@ public final class JdbcClanStore implements ClanStore
 	@Override
 	public void deleteClan(ClanDeletion deletion)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
+			JdbcSupport.transaction(con ->
 			{
 				executeDelete(con, DELETE_CLAN, deletion.clanId());
 				executeDelete(con, DELETE_CLAN_PRIVS, deletion.clanId());
@@ -142,17 +142,7 @@ public final class JdbcClanStore implements ClanStore
 				executeDelete(con, DELETE_CLAN_SIEGES, deletion.clanId());
 				if (deletion.castleId() != 0)
 					executeDelete(con, RESET_CASTLE_TAX, deletion.castleId());
-				con.commit();
-			}
-			catch (Exception e)
-			{
-				con.rollback();
-				throw e;
-			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
+			});
 		}
 		catch (Exception e)
 		{
@@ -160,7 +150,7 @@ public final class JdbcClanStore implements ClanStore
 		}
 	}
 
-	private static void executeDelete(Connection con, String sql, int... values) throws Exception
+	private static void executeDelete(Connection con, String sql, int... values) throws SQLException
 	{
 		try (PreparedStatement ps = con.prepareStatement(sql))
 		{
@@ -170,7 +160,7 @@ public final class JdbcClanStore implements ClanStore
 		}
 	}
 
-	private static void executeDeleteStrings(Connection con, String sql, String... values) throws Exception
+	private static void executeDeleteStrings(Connection con, String sql, String... values) throws SQLException
 	{
 		try (PreparedStatement ps = con.prepareStatement(sql))
 		{

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.loginserver.data.repository.AccountStore;
@@ -201,25 +202,23 @@ public final class JdbcAccountStore implements AccountStore
 		if (existing != null)
 			return ExternalAuthResolution.success(existing);
 
-		try (Connection con = ConnectionPool.getConnection())
+		try
 		{
-			try (PreparedStatement psCheck = con.prepareStatement(CHECK_ACCOUNT_EXISTS))
+			return JdbcSupport.transactionResult(con ->
 			{
-				psCheck.setString(1, derivedLogin);
-				try (ResultSet rs = psCheck.executeQuery())
+				try (PreparedStatement psCheck = con.prepareStatement(CHECK_ACCOUNT_EXISTS))
 				{
-					if (rs.next())
+					psCheck.setString(1, derivedLogin);
+					try (ResultSet rs = psCheck.executeQuery())
 					{
-						LOGGER.warn("Account conflict: derived login '{}' already exists without mapping to {} / {}.", derivedLogin, provider, providerUserId);
-						return ExternalAuthResolution.conflict();
+						if (rs.next())
+						{
+							LOGGER.warn("Account conflict: derived login '{}' already exists without mapping to {} / {}.", derivedLogin, provider, providerUserId);
+							return ExternalAuthResolution.conflict();
+						}
 					}
 				}
-			}
 
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
-			{
 				final long currentTime = System.currentTimeMillis();
 				final String unusablePassword = "DISCORD_AUTH_" + java.util.UUID.randomUUID();
 
@@ -240,26 +239,15 @@ public final class JdbcAccountStore implements AccountStore
 					psExternal.executeUpdate();
 				}
 
-				con.commit();
 				LOGGER.info("Successfully provisioned new external account '{}' for {} / {}.", derivedLogin, provider, providerUserId);
 				return ExternalAuthResolution.success(new Account(derivedLogin, unusablePassword, 0, 1));
-			}
-			catch (Exception e)
-			{
-				con.rollback();
-				LOGGER.warn("Concurrent creation or database error for {} / {}: {}. Attempting re-read.", provider, providerUserId, e.getMessage());
-				final Account reRead = getExternalAccount(provider, providerUserId);
-				return reRead != null ? ExternalAuthResolution.success(reRead) : ExternalAuthResolution.creationFailed();
-			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
+			});
 		}
 		catch (Exception e)
 		{
-			LOGGER.error("Database connection error while resolving external account for {} / {}.", e, provider, providerUserId);
-			return ExternalAuthResolution.creationFailed();
+			LOGGER.warn("Concurrent creation or database error for {} / {}: {}. Attempting re-read.", provider, providerUserId, e.getMessage());
+			final Account reRead = getExternalAccount(provider, providerUserId);
+			return reRead != null ? ExternalAuthResolution.success(reRead) : ExternalAuthResolution.creationFailed();
 		}
 	}
 }

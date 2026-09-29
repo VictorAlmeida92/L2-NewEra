@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.OfflineTradeItem;
 import ext.mods.gameserver.data.repository.OfflineTraderData;
@@ -25,10 +26,8 @@ public final class JdbcOfflineTraderStore implements OfflineTraderStore
 	@Override
 	public void replaceAll(List<OfflineTraderData> traders) throws SQLException
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		JdbcSupport.transaction(con ->
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
 			try (PreparedStatement clearStatus = con.prepareStatement(CLEAR_STATUS); PreparedStatement clearItems = con.prepareStatement(CLEAR_ITEMS); PreparedStatement saveStatus = con.prepareStatement(SAVE_STATUS); PreparedStatement saveItem = con.prepareStatement(SAVE_ITEM))
 			{
 				clearItems.executeUpdate();
@@ -53,25 +52,8 @@ public final class JdbcOfflineTraderStore implements OfflineTraderStore
 					}
 					saveItem.executeBatch();
 				}
-				con.commit();
 			}
-			catch (SQLException e)
-			{
-				try
-				{
-					con.rollback();
-				}
-				catch (SQLException rollbackFailure)
-				{
-					e.addSuppressed(rollbackFailure);
-				}
-				throw e;
-			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
-		}
+		});
 	}
 
 	@Override

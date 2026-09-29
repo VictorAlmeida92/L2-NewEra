@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.RecommendationStore;
 
@@ -37,51 +38,28 @@ public final class JdbcRecommendationStore implements RecommendationStore
 	@Override
 	public void addRecommendation(int giverObjectId, int targetObjectId, int targetRecomHave, int giverRecomLeft) throws SQLException
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		JdbcSupport.transaction(con ->
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
+			try (PreparedStatement ps = con.prepareStatement(INSERT_RECOMMENDATION))
 			{
-				try (PreparedStatement ps = con.prepareStatement(INSERT_RECOMMENDATION))
-				{
-					ps.setInt(1, giverObjectId);
-					ps.setInt(2, targetObjectId);
-					ps.executeUpdate();
-				}
-
-				try (PreparedStatement ps = con.prepareStatement(UPDATE_TARGET_HAVE))
-				{
-					ps.setInt(1, targetRecomHave);
-					ps.setInt(2, targetObjectId);
-					ps.executeUpdate();
-				}
-
-				try (PreparedStatement ps = con.prepareStatement(UPDATE_GIVER_LEFT))
-				{
-					ps.setInt(1, giverRecomLeft);
-					ps.setInt(2, giverObjectId);
-					ps.executeUpdate();
-				}
-
-				con.commit();
+				ps.setInt(1, giverObjectId);
+				ps.setInt(2, targetObjectId);
+				ps.executeUpdate();
 			}
-			catch (SQLException e)
+
+			try (PreparedStatement ps = con.prepareStatement(UPDATE_TARGET_HAVE))
 			{
-				try
-				{
-					con.rollback();
-				}
-				catch (SQLException rollbackFailure)
-				{
-					e.addSuppressed(rollbackFailure);
-				}
-				throw e;
+				ps.setInt(1, targetRecomHave);
+				ps.setInt(2, targetObjectId);
+				ps.executeUpdate();
 			}
-			finally
+
+			try (PreparedStatement ps = con.prepareStatement(UPDATE_GIVER_LEFT))
 			{
-				con.setAutoCommit(previousAutoCommit);
+				ps.setInt(1, giverRecomLeft);
+				ps.setInt(2, giverObjectId);
+				ps.executeUpdate();
 			}
-		}
+		});
 	}
 }
