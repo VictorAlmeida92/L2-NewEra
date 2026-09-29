@@ -1,11 +1,12 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcItemStore;
 import ext.mods.gameserver.data.repository.ItemRecord;
 import ext.mods.gameserver.data.repository.ItemSaveRecord;
 import ext.mods.gameserver.data.repository.ItemStore;
@@ -17,7 +18,7 @@ import ext.mods.gameserver.model.item.kind.Weapon;
 /** Application boundary for item persistence. */
 public final class ItemPersistenceService
 {
-	private static final ItemStore STORE = new JdbcItemStore();
+	private static final ItemStore STORE = PersistenceRegistry.items();
 
 	private ItemPersistenceService()
 	{

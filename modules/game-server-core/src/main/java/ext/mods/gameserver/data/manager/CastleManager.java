@@ -17,6 +17,8 @@
  */
 package ext.mods.gameserver.data.manager;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Collection;
@@ -26,7 +28,6 @@ import java.util.Map;
 import ext.mods.commons.data.StatSet;
 import ext.mods.commons.data.xml.IXmlReader;
 
-import ext.mods.gameserver.data.adapter.JdbcCastleStore;
 import ext.mods.gameserver.data.repository.CastleStore;
 import ext.mods.gameserver.data.sql.ClanTable;
 import ext.mods.gameserver.enums.CabalType;
@@ -56,7 +57,7 @@ public final class CastleManager implements IXmlReader
 	
 	protected CastleManager()
 	{
-		this(new JdbcCastleStore());
+		this(PersistenceRegistry.castles());
 	}
 
 	CastleManager(CastleStore store)

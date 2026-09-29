@@ -17,11 +17,12 @@
  */
 package ext.mods.gameserver.model.buylist;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 import ext.mods.commons.data.StatSet;
 
-import ext.mods.gameserver.data.adapter.JdbcBuyListStore;
 import ext.mods.gameserver.data.repository.BuyListStore;
 import ext.mods.gameserver.data.xml.ItemData;
 import ext.mods.gameserver.model.item.kind.Item;
@@ -43,7 +44,7 @@ public class Product
 	
 	public Product(int buyListId, StatSet set)
 	{
-		this(buyListId, set, new JdbcBuyListStore());
+		this(buyListId, set, PersistenceRegistry.buyLists());
 	}
 
 	public Product(int buyListId, StatSet set, BuyListStore store)

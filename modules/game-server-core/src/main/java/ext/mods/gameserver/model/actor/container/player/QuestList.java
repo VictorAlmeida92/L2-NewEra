@@ -17,12 +17,13 @@
  */
 package ext.mods.gameserver.model.actor.container.player;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 import ext.mods.commons.logging.CLogger;
-import ext.mods.gameserver.data.adapter.JdbcQuestStore;
 import ext.mods.gameserver.data.repository.QuestStore;
 import ext.mods.gameserver.data.xml.ScriptData;
 import ext.mods.gameserver.enums.EventHandler;
@@ -46,7 +47,7 @@ public final class QuestList extends ArrayList<QuestState>
 	
 	public QuestList(Player player)
 	{
-		this(player, new JdbcQuestStore());
+		this(player, PersistenceRegistry.quests());
 	}
 
 	public QuestList(Player player, QuestStore store)

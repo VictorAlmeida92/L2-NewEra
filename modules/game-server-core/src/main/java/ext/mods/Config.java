@@ -67,7 +67,7 @@ public final class Config {
    public static byte ANP_KEY = -5;
    public static byte ULT_KEY = 12;
    public static int NPROTECT_KEY = -1;
-   public static final String BOSS_JEWEL_UPGRADES_FILE = CONFIG_PATH.resolve("BossJewelUpgrades.properties").toString();
+   public static final String BOSS_JEWEL_UPGRADES_FILE = CONFIG_PATH.resolve("bossJewelUpgrades.properties").toString();
    public static final Map<String, String> COUNTRY_LOCALE_MAP = new HashMap<>();
    public static String DATABASE_URL;
    public static String DATABASE_LOGIN;

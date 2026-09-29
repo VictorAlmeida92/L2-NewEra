@@ -1,15 +1,16 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcRecommendationStore;
 import ext.mods.gameserver.data.repository.RecommendationStore;
 
 /** Application boundary for player recommendation persistence. */
 public final class RecommendationPersistenceService
 {
-	private static final RecommendationStore STORE = new JdbcRecommendationStore();
+	private static final RecommendationStore STORE = PersistenceRegistry.recommendations();
 
 	private RecommendationPersistenceService()
 	{

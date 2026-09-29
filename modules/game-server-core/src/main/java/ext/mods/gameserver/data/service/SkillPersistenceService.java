@@ -1,10 +1,11 @@
 package ext.mods.gameserver.data.service;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-import ext.mods.gameserver.data.adapter.JdbcSkillStore;
 import ext.mods.gameserver.data.repository.SkillRecord;
 import ext.mods.gameserver.data.repository.SkillSaveRecord;
 import ext.mods.gameserver.data.repository.SkillStore;
@@ -12,7 +13,7 @@ import ext.mods.gameserver.data.repository.SkillStore;
 /** Application boundary for character skill persistence. */
 public final class SkillPersistenceService
 {
-	private static final SkillStore STORE = new JdbcSkillStore();
+	private static final SkillStore STORE = PersistenceRegistry.skills();
 
 	private SkillPersistenceService()
 	{

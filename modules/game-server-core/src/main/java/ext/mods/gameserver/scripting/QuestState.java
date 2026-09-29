@@ -17,12 +17,13 @@
  */
 package ext.mods.gameserver.scripting;
 
+import ext.mods.gameserver.data.PersistenceRegistry;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
 import ext.mods.commons.data.MemoSet;
-import ext.mods.gameserver.data.adapter.JdbcQuestStore;
 import ext.mods.gameserver.data.repository.QuestStore;
 import ext.mods.gameserver.enums.QuestStatus;
 import ext.mods.gameserver.enums.actors.MissionType;
@@ -59,7 +60,7 @@ public final class QuestState extends MemoSet
 	 */
 	public QuestState(Player player, Quest quest)
 	{
-		this(player, quest, new JdbcQuestStore());
+		this(player, quest, PersistenceRegistry.quests());
 	}
 
 	public QuestState(Player player, Quest quest, QuestStore store)
