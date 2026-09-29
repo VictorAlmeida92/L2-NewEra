@@ -33,6 +33,12 @@ Para cada solicitação de feature, fix ou hotfix:
 
 Alterações de runtime, banco local, caches, certificados e arquivos gerados não devem ser commitadas. A branch `main` recebe mudanças somente por Pull Request. A branch `dev` fica fora do fluxo padrão enquanto o projeto tiver um único desenvolvedor; se for retomada no futuro, deverá ser explicitamente solicitada.
 
+## Regra de testes por cenário
+
+Toda mudança deve incluir pelo menos um teste específico para o cenário alterado, além da compilação e da suíte existente. Quando a mudança envolver persistência, adicionar testes unitários para as regras locais e testes de integração para o fluxo no banco; SQLite pode ser usado nesses testes isolados por ser leve, enquanto o Compose/PostgreSQL deve validar a integração oficial.
+
+Exemplos: uma alteração em clãs deve testar criação, persistência, consulta e remoção de um clã; uma alteração em NPC shops deve testar carregamento e compra; uma alteração em Olympiad deve testar o estado persistido e sua recuperação. O teste deve reproduzir o risco que motivou a mudança, e não apenas verificar que uma classe foi carregada.
+
 ## Convenções de commits
 
 Usar, conforme o caso: `feat:`, `fix:`, `hotfix:`, `refactor:`, `docs:`, `test:` ou `chore:`.

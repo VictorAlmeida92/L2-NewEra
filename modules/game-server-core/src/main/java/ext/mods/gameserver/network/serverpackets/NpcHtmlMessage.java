@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import ext.mods.gameserver.data.HTMLData;
 import ext.mods.gameserver.enums.SayType;
 import ext.mods.gameserver.model.actor.Player;
+import ext.mods.gameserver.network.GameClient;
 
 
 public final class NpcHtmlMessage extends L2GameServerPacket
@@ -54,7 +55,14 @@ public final class NpcHtmlMessage extends L2GameServerPacket
 		if (!_validate)
 			return;
 		
-		final Player player = getClient().getPlayer();
+		final GameClient client = getClient();
+		if (client == null)
+		{
+			LOGGER.warn("Skipping NpcHtmlMessage post-processing because the client is no longer attached.");
+			return;
+		}
+
+		final Player player = client.getPlayer();
 		if (player == null)
 			return;
 		
