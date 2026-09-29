@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.CharacterStore;
@@ -220,50 +221,28 @@ public final class JdbcCharacterStore implements CharacterStore
 		if (objectId < 0)
 			return;
 
-		try (Connection con = ConnectionPool.getConnection())
+		JdbcSupport.transaction(con ->
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
-			{
-				executeDelete(con, DELETE_CHAR_HENNAS, objectId);
-				executeDelete(con, DELETE_CHAR_MACROS, objectId);
-				executeDelete(con, DELETE_CHAR_MEMOS, objectId);
-				executeDelete(con, DELETE_CHAR_QUESTS, objectId);
-				executeDelete(con, DELETE_CHAR_RECIPES, objectId);
-				executeDeleteRelations(con, objectId);
-				executeDelete(con, DELETE_CHAR_SHORTCUTS, objectId);
-				executeDelete(con, DELETE_CHAR_SKILLS, objectId);
-				executeDelete(con, DELETE_CHAR_SKILLS_SAVE, objectId);
-				executeDelete(con, DELETE_CHAR_SUBCLASSES, objectId);
-				executeDelete(con, DELETE_CHAR_HERO, objectId);
-				executeDelete(con, DELETE_CHAR_NOBLE, objectId);
-				executeDelete(con, DELETE_CHAR_SEVEN_SIGNS, objectId);
-				executeDelete(con, DELETE_CHAR_PETS, objectId);
-				executeDelete(con, DELETE_CHAR_AUGMENTS, objectId);
-				executeDelete(con, DELETE_CHAR_ITEMS, objectId);
-				executeDelete(con, DELETE_CHAR_RBP, objectId);
-				executeDelete(con, DELETE_CHAR, objectId);
-				executeDelete(con, DELETE_CHAR_CACHE, objectId);
-				con.commit();
-			}
-			catch (SQLException e)
-			{
-				try
-				{
-					con.rollback();
-				}
-				catch (SQLException rollbackFailure)
-				{
-					e.addSuppressed(rollbackFailure);
-				}
-				throw e;
-			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
-		}
+			executeDelete(con, DELETE_CHAR_HENNAS, objectId);
+			executeDelete(con, DELETE_CHAR_MACROS, objectId);
+			executeDelete(con, DELETE_CHAR_MEMOS, objectId);
+			executeDelete(con, DELETE_CHAR_QUESTS, objectId);
+			executeDelete(con, DELETE_CHAR_RECIPES, objectId);
+			executeDeleteRelations(con, objectId);
+			executeDelete(con, DELETE_CHAR_SHORTCUTS, objectId);
+			executeDelete(con, DELETE_CHAR_SKILLS, objectId);
+			executeDelete(con, DELETE_CHAR_SKILLS_SAVE, objectId);
+			executeDelete(con, DELETE_CHAR_SUBCLASSES, objectId);
+			executeDelete(con, DELETE_CHAR_HERO, objectId);
+			executeDelete(con, DELETE_CHAR_NOBLE, objectId);
+			executeDelete(con, DELETE_CHAR_SEVEN_SIGNS, objectId);
+			executeDelete(con, DELETE_CHAR_PETS, objectId);
+			executeDelete(con, DELETE_CHAR_AUGMENTS, objectId);
+			executeDelete(con, DELETE_CHAR_ITEMS, objectId);
+			executeDelete(con, DELETE_CHAR_RBP, objectId);
+			executeDelete(con, DELETE_CHAR, objectId);
+			executeDelete(con, DELETE_CHAR_CACHE, objectId);
+		});
 	}
 
 	private static void executeDelete(Connection con, String sql, int objectId) throws SQLException

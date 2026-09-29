@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.SubclassRecord;
 import ext.mods.gameserver.data.repository.SubclassStore;
@@ -77,36 +78,14 @@ public final class JdbcSubclassStore implements SubclassStore
 	@Override
 	public void wipe(int characterObjectId, int classIndex) throws SQLException
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		JdbcSupport.transaction(con ->
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
-			{
-				executeDelete(con, DELETE_HENNAS, characterObjectId, classIndex);
-				executeDelete(con, DELETE_SHORTCUTS, characterObjectId, classIndex);
-				executeDelete(con, DELETE_SKILL_SAVE, characterObjectId, classIndex);
-				executeDelete(con, DELETE_SKILLS, characterObjectId, classIndex);
-				executeDelete(con, DELETE_SUBCLASS, characterObjectId, classIndex);
-				con.commit();
-			}
-			catch (SQLException e)
-			{
-				try
-				{
-					con.rollback();
-				}
-				catch (SQLException rollbackFailure)
-				{
-					e.addSuppressed(rollbackFailure);
-				}
-				throw e;
-			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
-		}
+			executeDelete(con, DELETE_HENNAS, characterObjectId, classIndex);
+			executeDelete(con, DELETE_SHORTCUTS, characterObjectId, classIndex);
+			executeDelete(con, DELETE_SKILL_SAVE, characterObjectId, classIndex);
+			executeDelete(con, DELETE_SKILLS, characterObjectId, classIndex);
+			executeDelete(con, DELETE_SUBCLASS, characterObjectId, classIndex);
+		});
 	}
 
 	private static void executeDelete(Connection con, String sql, int characterObjectId, int classIndex) throws SQLException

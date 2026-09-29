@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import ext.mods.commons.jdbc.DatabaseDialect;
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.SkillRecord;
 import ext.mods.gameserver.data.repository.SkillSaveRecord;
@@ -111,56 +112,34 @@ public final class JdbcSkillStore implements SkillStore
 	@Override
 	public void replaceSkillSaves(int characterObjectId, int classIndex, Collection<SkillSaveRecord> records) throws SQLException
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		JdbcSupport.transaction(con ->
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
+			try (PreparedStatement delete = con.prepareStatement(DELETE_SKILL_SAVES))
 			{
-				try (PreparedStatement delete = con.prepareStatement(DELETE_SKILL_SAVES))
-				{
-					delete.setInt(1, characterObjectId);
-					delete.setInt(2, classIndex);
-					delete.executeUpdate();
-				}
+				delete.setInt(1, characterObjectId);
+				delete.setInt(2, classIndex);
+				delete.executeUpdate();
+			}
 
-				try (PreparedStatement insert = con.prepareStatement(INSERT_SKILL_SAVE))
-				{
-					for (SkillSaveRecord record : records)
-					{
-						insert.setInt(1, characterObjectId);
-						insert.setInt(2, record.skillId());
-						insert.setInt(3, record.skillLevel());
-						insert.setInt(4, record.effectCount());
-						insert.setInt(5, record.effectCurrentTime());
-						insert.setLong(6, record.reuseDelay());
-						insert.setLong(7, record.systemTime());
-						insert.setInt(8, record.restoreType());
-						insert.setInt(9, classIndex);
-						insert.setInt(10, record.buffIndex());
-						insert.setInt(11, record.npc() ? 1 : 0);
-						insert.addBatch();
-					}
-					insert.executeBatch();
-				}
-				con.commit();
-			}
-			catch (SQLException e)
+			try (PreparedStatement insert = con.prepareStatement(INSERT_SKILL_SAVE))
 			{
-				try
+				for (SkillSaveRecord record : records)
 				{
-					con.rollback();
+					insert.setInt(1, characterObjectId);
+					insert.setInt(2, record.skillId());
+					insert.setInt(3, record.skillLevel());
+					insert.setInt(4, record.effectCount());
+					insert.setInt(5, record.effectCurrentTime());
+					insert.setLong(6, record.reuseDelay());
+					insert.setLong(7, record.systemTime());
+					insert.setInt(8, record.restoreType());
+					insert.setInt(9, classIndex);
+					insert.setInt(10, record.buffIndex());
+					insert.setInt(11, record.npc() ? 1 : 0);
+					insert.addBatch();
 				}
-				catch (SQLException rollbackFailure)
-				{
-					e.addSuppressed(rollbackFailure);
-				}
-				throw e;
+				insert.executeBatch();
 			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
-		}
+		});
 	}
 }

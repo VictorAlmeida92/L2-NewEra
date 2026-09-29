@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.pool.ConnectionPool;
 import ext.mods.gameserver.data.repository.BufferSchemeStore;
@@ -38,11 +39,9 @@ public final class JdbcBufferSchemeStore implements BufferSchemeStore
 	@Override
 	public void replaceSchemes(List<SchemeRecord> schemes)
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try
 		{
-			final boolean previousAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
-			try
+			JdbcSupport.transaction(con ->
 			{
 				try (PreparedStatement clear = con.prepareStatement(CLEAR_SCHEMES))
 				{
@@ -61,17 +60,7 @@ public final class JdbcBufferSchemeStore implements BufferSchemeStore
 					}
 					insert.executeBatch();
 				}
-				con.commit();
-			}
-			catch (Exception e)
-			{
-				con.rollback();
-				throw e;
-			}
-			finally
-			{
-				con.setAutoCommit(previousAutoCommit);
-			}
+			});
 		}
 		catch (Exception e)
 		{

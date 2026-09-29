@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import ext.mods.commons.db.JdbcSupport;
 import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.logging.CLogger;
 import ext.mods.commons.pool.ConnectionPool;
@@ -176,20 +177,16 @@ public final class JdbcOlympiadStore implements OlympiadStore
 	@Override
 	public void archiveNobles()
 	{
-		try (Connection con = ConnectionPool.getConnection())
+		try
 		{
-			con.setAutoCommit(false);
-			try (PreparedStatement clear = con.prepareStatement(DatabaseDialect.adapt(DELETE_ARCHIVED_NOBLES)); PreparedStatement archive = con.prepareStatement(ARCHIVE_NOBLES))
+			JdbcSupport.transaction(con ->
 			{
-				clear.executeUpdate();
-				archive.executeUpdate();
-				con.commit();
-			}
-			catch (Exception e)
-			{
-				con.rollback();
-				throw e;
-			}
+				try (PreparedStatement clear = con.prepareStatement(DatabaseDialect.adapt(DELETE_ARCHIVED_NOBLES)); PreparedStatement archive = con.prepareStatement(ARCHIVE_NOBLES))
+				{
+					clear.executeUpdate();
+					archive.executeUpdate();
+				}
+			});
 		}
 		catch (Exception e)
 		{

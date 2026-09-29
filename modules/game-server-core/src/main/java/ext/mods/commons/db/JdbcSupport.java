@@ -58,6 +58,51 @@ public final class JdbcSupport
 			throw new DbException("JDBC run failed", e);
 		}
 	}
+
+	/**
+	 * Executes a unit of work in one JDBC transaction while preserving the
+	 * connection state expected by the pool.
+	 */
+	public static void transaction(SqlConsumer consumer) throws SQLException
+	{
+		transactionResult(con ->
+		{
+			consumer.accept(con);
+			return null;
+		});
+	}
+
+	/** Executes a unit of work in one JDBC transaction and returns its result. */
+	public static <R> R transactionResult(SqlFunction<R> function) throws SQLException
+	{
+		try (Connection con = connection())
+		{
+			final boolean previousAutoCommit = con.getAutoCommit();
+			con.setAutoCommit(false);
+			try
+			{
+				final R result = function.apply(con);
+				con.commit();
+				return result;
+			}
+			catch (SQLException | RuntimeException e)
+			{
+				try
+				{
+					con.rollback();
+				}
+				catch (SQLException rollbackFailure)
+				{
+					e.addSuppressed(rollbackFailure);
+				}
+				throw e;
+			}
+			finally
+			{
+				con.setAutoCommit(previousAutoCommit);
+			}
+		}
+	}
 	
 	public static <R> R call(SqlFunction<R> function)
 	{
