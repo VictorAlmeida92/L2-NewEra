@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate brproject-data/migrations Flyway baseline from tools/sql (Phase 5)."""
+"""Regenerate the canonical Flyway baseline from legacy tools/sql sources."""
 from __future__ import annotations
 
 import re
@@ -7,8 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SQL_DIR = ROOT / "tools/sql"
-OUT = ROOT / "brproject-data/migrations"
-MANIFEST = ROOT / "brproject-data/SQL_MANIFEST.txt"
+OUT = ROOT / "database/migrations"
+MANIFEST = ROOT / "database/LEGACY_SQL_MANIFEST.txt"
 
 EXCLUDE = {
     "donations_upgrade_legacy.sql",

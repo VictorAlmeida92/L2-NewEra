@@ -771,9 +771,9 @@ public class PrepararAmbientePanel {
         }
         String flywayLocation() {
             switch (key) {
-                case "sqlite":     return "classpath:brproject-data/migrations/sqlite";
-                case "postgresql": return "classpath:brproject-data/migrations/postgresql";
-                default:           return "classpath:brproject-data/migrations/mariadb";
+                case "sqlite":     return "filesystem:database/migrations/sqlite";
+                case "postgresql": return "filesystem:database/migrations/postgresql";
+                default:           return "filesystem:database/migrations/mariadb";
             }
         }
         @Override public String toString() { return label; }

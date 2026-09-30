@@ -1,6 +1,6 @@
 # Mapa arquitetural — L2 NewEra
 
-Status: baseline investigativo, atualizado em 2026-09-24.
+Status: baseline investigativo, atualizado em 2026-09-30.
 
 Este documento descreve o que foi confirmado no código atual. Propostas futuras estão marcadas como **planejado** e não devem ser interpretadas como funcionalidades já integradas.
 
@@ -13,7 +13,7 @@ flowchart LR
     Login[LoginServer\nporta interna 2107]
     Game[GameServer\nporta interna 7778]
     API[Game API\nloopback 9080]
-    DB[(SQLite runtime\ndata/brproject.sqlite)]
+    DB[(PostgreSQL runtime\nDocker/RDS)]
     Site[Site/integrações]
 
     Client -->|login| Proxy
@@ -101,23 +101,31 @@ classDiagram
     }
     class ConnectionPool {
       +HikariCP
-      +SQLite pool=3
-      +WAL + busy_timeout
+      +JDBC configurável
+      +DatabaseDialect
     }
-    class SQLiteRuntime {
-      +brproject.sqlite
-      +brproject.sqlite-wal
-      +brproject.sqlite-shm
+    class PostgreSQLRuntime {
+      +schema versionado
+      +migrations Flyway
+      +volume persistente
     }
 
     GameClient --> Player : mantém sessão
     GameClient --> PlayerPersistence : agenda store()
     Player --> PlayerPersistence : logout/shutdown
     PlayerPersistence --> ConnectionPool : JDBC
-    ConnectionPool --> SQLiteRuntime : transações em disco
+    ConnectionPool --> PostgreSQLRuntime : transações JDBC
 ```
 
-### O que WAL e SHM significam
+### Runtime oficial e legado SQLite
+
+O runtime oficial de desenvolvimento e produção usa PostgreSQL. O Compose
+mantém os dados em volume persistente e o módulo `db-migrate` aplica as
+migrations canônicas de `database/migrations/postgresql` antes de iniciar os
+servidores. MariaDB permanece como alvo de compatibilidade e SQLite é usado
+somente por testes leves e ferramentas legadas.
+
+No runtime SQLite anterior:
 
 - `brproject.sqlite` é o banco persistente local.
 - `brproject.sqlite-wal` é o write-ahead log em disco das transações recentes.
@@ -132,7 +140,7 @@ sequenceDiagram
     participant C as Cliente
     participant P as Player em memória
     participant S as Autosave/Logout
-    participant DB as SQLite + WAL
+    participant DB as Banco persistente
 
     C->>P: level-up para 80
     Note over P: estado 80 existe somente na sessão
@@ -142,7 +150,7 @@ sequenceDiagram
     DB-->>C: último estado confirmado: nível 79
 ```
 
-O código atual agenda o primeiro autosave em 300.000 ms e os seguintes em 900.000 ms. O desligamento normal também salva jogadores, mas um encerramento forçado, queda de energia ou kill do processo pode interromper esse caminho.
+O código agenda o primeiro autosave em 300.000 ms e os seguintes em 900.000 ms. O desligamento normal também salva jogadores, mas um encerramento forçado, queda de energia ou kill do processo pode interromper esse caminho. PostgreSQL elimina a dependência dos arquivos locais WAL/SHM do SQLite, mas não salva automaticamente um estado que ainda existe somente no objeto `Player`.
 
 ### Próxima investigação recomendada
 
@@ -193,7 +201,7 @@ flowchart TB
 - Banco sem IP público; somente o security group da aplicação pode acessá-lo.
 - Uma EC2 única para jogo, login e site é aceitável no primeiro ambiente, mas deve ter processos, limites e deploys separados.
 - Para aproximadamente 250 jogadores, o tamanho da EC2 deve ser escolhido por teste de carga com bots e cenários de cidade/PvP, não por estimativa.
-- PostgreSQL é uma boa meta de produção, mas a migração exige revisar SQL específico de SQLite, schema, migrations e testes de integração.
+- PostgreSQL é o banco oficial. O deployment de produção deve usar RDS PostgreSQL ou uma instância PostgreSQL compatível, aplicar as migrations antes da aplicação e validar backup/restauração.
 - Session Manager é preferível a manter SSH público; bastion só deve ser criado se houver uma necessidade operacional concreta.
 - Shield Standard é a camada básica. Para ataques relevantes contra TCP/UDP, estudar Global Accelerator e Shield Advanced; WAF protege a superfície web, não substitui proteção do protocolo do jogo.
 

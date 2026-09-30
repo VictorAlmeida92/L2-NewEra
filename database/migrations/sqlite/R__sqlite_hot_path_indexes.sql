@@ -1,4 +1,4 @@
--- Hot-path indexes for SQLite generated from data/Backup.sql
+-- Hot-path indexes for the canonical SQLite schema.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_characters_char_name ON characters(char_name);
 CREATE INDEX IF NOT EXISTS idx_characters_account_name ON characters(account_name);
 CREATE INDEX IF NOT EXISTS idx_characters_online_account ON characters(online, account_name);

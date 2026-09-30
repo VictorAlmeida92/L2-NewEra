@@ -628,7 +628,7 @@ public class ProcessManagerService {
             }
         }
         env.putIfAbsent("SITE_ROOT", siteDir.getAbsolutePath());
-        env.putIfAbsent("SITE_MIGRATIONS", new File(projectRoot, "brproject-data/migrations/mariadb").getAbsolutePath());
+        env.putIfAbsent("SITE_MIGRATIONS", new File(projectRoot, "database/migrations/mariadb").getAbsolutePath());
     }
 
     private Properties loadGameServerDbProperties(File projectRoot) {
