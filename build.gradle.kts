@@ -187,10 +187,59 @@ tasks.register("checkPersistenceConstructionBoundary") {
     }
 }
 
+tasks.register("checkRuntimeScripts") {
+    group = "verification"
+    description = "Validates the canonical Docker runtime commands and compatibility wrappers"
+
+    doLast {
+        val canonicalPowerShell = rootProject.file("tools/runtime/l2newera.ps1")
+        val canonicalShell = rootProject.file("tools/runtime/l2newera.sh")
+        val wrapperPowerShell = rootProject.file("StartL2NewEra.ps1")
+        val wrapperShell = rootProject.file("StartL2NewEra.sh")
+        val wrapperBatch = rootProject.file("StartL2NewEra.bat")
+
+        val requiredFiles = listOf(
+            canonicalPowerShell,
+            canonicalShell,
+            wrapperPowerShell,
+            wrapperShell,
+            wrapperBatch,
+        )
+        val missing = requiredFiles.filterNot { it.isFile }.map { it.relativeTo(rootProject.projectDir).path }
+        if (missing.isNotEmpty())
+            throw GradleException("Missing canonical runtime scripts: $missing")
+
+        val requiredActions = listOf("init", "validate", "build", "up", "down", "restart", "status", "logs")
+        val canonicalScripts = listOf(canonicalPowerShell, canonicalShell)
+        canonicalScripts.forEach { script ->
+            val content = script.readText()
+            val absentActions = requiredActions.filterNot(content::contains)
+            if (absentActions.isNotEmpty())
+                throw GradleException("${script.path} does not implement runtime actions: $absentActions")
+            if (!content.contains("deploy/docker/docker-compose.yml") && !content.contains("deploy\\docker\\docker-compose.yml"))
+                throw GradleException("${script.path} does not use the canonical Compose file")
+            if (content.contains("down -v") || content.contains("\"down\", \"-v\""))
+                throw GradleException("${script.path} must not expose destructive volume removal")
+        }
+
+        mapOf(
+            wrapperPowerShell to "tools\\runtime\\l2newera.ps1",
+            wrapperShell to "tools/runtime/l2newera.sh",
+            wrapperBatch to "StartL2NewEra.ps1",
+        ).forEach { (wrapper, target) ->
+            if (!wrapper.readText().contains(target))
+                throw GradleException("${wrapper.path} no longer delegates to $target")
+        }
+
+        logger.lifecycle("Runtime script contract: clean")
+    }
+}
+
 tasks.named("build") {
     dependsOn("checkDatabaseSql")
     dependsOn("checkDatabaseConnectionBoundary")
     dependsOn("checkPersistenceConstructionBoundary")
+    dependsOn("checkRuntimeScripts")
 }
 
 tasks.register("brCompileIncremental") {

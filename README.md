@@ -652,24 +652,28 @@ O `build.gradle.kts` disponibiliza flags de compilação customizáveis:
 
 ## 🐳 Execução (Host & Docker Compose)
 
-### Executando em Host (Scripts Nativos)
+### Ambiente local oficial
 
-Para o desenvolvimento local no Windows, use o launcher unificado. Ele inicia GameServer, LoginServer e Proxy em segundo plano, aguardando cada porta ficar pronta, e grava os logs em `logs/`:
+O launcher unificado opera o stack Docker oficial (`PostgreSQL`, migrations,
+LoginServer e GameServer) e preserva o volume do banco ao parar ou reiniciar:
 
 ```powershell
-./StartL2NewEra.bat
+./StartL2NewEra.bat up
 ```
 
-| Serviço | macOS / Linux | Windows CMD / PowerShell |
-|---|---|---|
-| **Login Server** | `./StartLogin_SemDashboard.sh` | `StartLogin_SemDashboard.bat` |
-| **Game Server** | `./StartGame_SemDashboard.sh` | `StartGame_SemDashboard.bat` |
-| **Launcher / GUI** | `./StartBrproject.sh` | `StartBrproject.bat` |
-| **Proxy Netty** | `./gradlew :proxy:run` | `gradlew.bat :proxy:run` |
+Use `status`, `logs`, `restart` e `down` como segundo argumento. Em
+PowerShell, `./StartL2NewEra.ps1 logs -Follow` acompanha os logs; em Linux ou
+macOS, use `./StartL2NewEra.sh logs --follow`. A referência completa está em
+[`tools/runtime/README.md`](tools/runtime/README.md).
+
+Os scripts `StartLogin_SemDashboard.*`, `StartGame_SemDashboard.*` e
+`StartBrproject.*` são mantidos como compatibilidade para execução legada por
+JAR/GUI e não representam o runtime oficial.
 
 ### Executando com Docker Compose
 
-A pasta `deploy/docker/` fornece a stack completa de microsserviços (`db` + `migrate` + `login` + `game` + `proxy`):
+A pasta `deploy/docker/` fornece a stack reproduzível atual (`db` + `migrate` +
+`login-server` + `game-server`):
 
 ```bash
 # 1. Copie o arquivo de variáveis de ambiente
@@ -679,7 +683,7 @@ cp .env.example .env
 docker compose -f deploy/docker/docker-compose.yml --env-file .env up -d --build
 
 # 3. Acompanhe os logs do GameServer
-docker compose -f deploy/docker/docker-compose.yml logs -f game
+docker compose -f deploy/docker/docker-compose.yml logs -f game-server
 ```
 
 ---

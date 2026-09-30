@@ -101,6 +101,13 @@ O Compose, o runner Flyway e os testes devem consumir essa raiz; `tools/sql/`
 permanece apenas como fonte legada do gerador, e `brproject-data/` mantém
 temporariamente exemplos de configuração.
 
+O runtime local oficial é operado por `tools/runtime/l2newera.ps1` e
+`tools/runtime/l2newera.sh`, com wrappers compatíveis `StartL2NewEra.*` na
+raiz. Novos comandos operacionais devem ser adicionados nessa interface, não em
+novos scripts soltos. Os launchers `StartLogin_SemDashboard.*`,
+`StartGame_SemDashboard.*` e `StartBrproject.*` são compatibilidade legada por
+JAR/GUI até seus consumidores serem isolados.
+
 ### Fase 4.1 — normalização estrutural do projeto
 
 Objetivo: separar claramente código-fonte, dados versionáveis, runtime, artefatos gerados e ferramentas legadas, preservando o comportamento do servidor. Esta fase não deve ser executada como uma grande movimentação de pastas; cada fronteira deve ser validada em uma PR independente ou em um pequeno grupo de PRs relacionadas.

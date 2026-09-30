@@ -80,6 +80,7 @@ flag/PrepararTeste.done
 .gradle-home/
 logs/
 thread-dump.txt
+**/nullgeo_bugs.txt
 
 # Geodata / heavy runtime
 game/data/prevention/

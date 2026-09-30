@@ -13,14 +13,27 @@ stack até terem uma imagem e um contrato de configuração próprios.
 Na raiz do projeto:
 
 ```bash
-./gradlew :app-dist:jar
-
-# O JAR é gerado em libs/server.jar apenas como artefato local temporário.
-# Ele não é necessário no checkout para construir as imagens.
 cp .env.example .env
 ```
 
 Altere as senhas de `.env` antes de expor qualquer porta fora da máquina local.
+As imagens compilam o JAR a partir do código-fonte durante o próprio build.
+
+## Interface operacional recomendada
+
+Na raiz do projeto, use os wrappers oficiais:
+
+```powershell
+./StartL2NewEra.ps1 validate
+./StartL2NewEra.ps1 up
+./StartL2NewEra.ps1 status
+./StartL2NewEra.ps1 logs -Follow
+./StartL2NewEra.ps1 down
+```
+
+Em Linux/macOS, os mesmos comandos estão disponíveis em
+`./StartL2NewEra.sh`. Os comandos abaixo permanecem documentados como interface
+direta do Compose para diagnóstico e automação.
 
 ## Subir
 
