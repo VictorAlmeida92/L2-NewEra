@@ -47,9 +47,9 @@ flowchart TD
 | `libs/server.jar` | Fat JAR produzido por `:app-dist:jar` | Artefato gerado | Remover do Git em etapa própria após adaptar Docker/scripts |
 | `libs/*.jar` exceto `server.jar` | Bibliotecas vendorizadas e integrações sem artefato Maven equivalente | Dependência vendorizada | Não remover automaticamente; catalogar origem/licença e migrar gradualmente |
 | `data/`, `db/`, `logs/`, caches e WAL/SHM | Bancos locais, logs e estado de execução | Runtime | Não versionar; preservar somente migrations, seeds e fixtures necessárias |
-| `bin/` | `cloudflared.exe` e `site-native.exe` | Ferramenta/legado | Mapear consumidores antes de separar ou remover |
-| `Hwid/` | `Capturar.JPG` e configuração/artefato de HWID | Legado/ferramenta | Identificar uso real antes de mover; não faz parte do núcleo do servidor |
-| `site/` | Código e artefatos do site integrado | Componente integrado | Documentar fronteira; extração para outro repositório é decisão futura |
+| `bin/` | `cloudflared.exe` e `site-native.exe` | Ferramenta opcional/legado | Manter temporariamente para a GUI; checksums protegidos e fora do Docker oficial |
+| `Hwid/` | `Capturar.JPG` e configuração do patch do cliente | Material do cliente | Fora do Docker; extrair quando existir repositório de distribuição do client patch |
+| `site/` | Snapshot estático sem build reproduzível completo | Componente web legado | Fora do Docker oficial; integração somente pela Game API |
 | `tools/runtime/` e `StartL2NewEra.*` | Interface operacional Docker | Ferramenta oficial | Manter como contrato canônico de build/start/stop/status/logs |
 | demais scripts `.bat`, `.sh`, `.ps1`, `.vbs`, `.command` | Inicialização direta por JAR e compatibilidade de ambientes | Wrappers legados | Manter enquanto houver consumidores na GUI, Gradle e classes Java; não usar como runtime oficial |
 
@@ -97,7 +97,7 @@ Antes de remover `libs/server.jar` do índice, uma PR própria deve:
 2. Política de artefatos e remoção segura do `server.jar` versionado.
 3. Consolidação de migrations, seeds e fixtures.
 4. Wrapper oficial de build/start/deploy, mantendo compatibilidade temporária — concluído em `feature/47-official-runtime-scripts`.
-5. Isolamento documentado de site, ferramentas e componentes legados.
+5. Isolamento documentado de site, ferramentas e componentes legados — concluído em `feature/48-legacy-component-boundaries`.
 6. CI, publicação reproduzível e validação de clone limpo.
 
 ## Riscos conhecidos

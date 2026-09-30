@@ -670,6 +670,11 @@ Os scripts `StartLogin_SemDashboard.*`, `StartGame_SemDashboard.*` e
 `StartBrproject.*` são mantidos como compatibilidade para execução legada por
 JAR/GUI e não representam o runtime oficial.
 
+O site estático, os executáveis Windows opcionais e o material do client patch
+possuem fronteiras próprias e não entram nas imagens do servidor. Consulte
+[`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md)
+antes de alterar `site/`, `bin/`, `Hwid/` ou `libs/`.
+
 ### Executando com Docker Compose
 
 A pasta `deploy/docker/` fornece a stack reproduzível atual (`db` + `migrate` +
