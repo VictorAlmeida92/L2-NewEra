@@ -1,0 +1,86 @@
+# Fronteiras de componentes e legado
+
+Atualizado em 2026-09-30. Este documento registra o quinto bloco da Fase 4.1 e
+distingue o servidor oficial de componentes opcionais, snapshots e ferramentas
+legadas.
+
+## Mapa de fronteiras
+
+```mermaid
+flowchart LR
+    Client[Cliente Interlude]
+    Patch[Hwid/\nmaterial do patch]
+    Game[LoginServer + GameServer\nDocker oficial]
+    API[game-api\nHTTP interno + HMAC]
+    DB[(PostgreSQL)]
+    Static[site/\nsnapshot estático]
+    SiteBin[bin/site-native.exe\nsite legado Windows]
+    Tunnel[bin/cloudflared.exe\ntúnel opcional]
+    GUI[Painel Swing legado]
+
+    Patch -. distribuído ao .-> Client
+    Client --> Game
+    Game --> DB
+    Static -. relação não comprovada .-> SiteBin
+    SiteBin --> API
+    API --> Game
+    GUI -. inicia opcionalmente .-> SiteBin
+    GUI -. inicia opcionalmente .-> Tunnel
+    Tunnel -. publica HTTP .-> SiteBin
+```
+
+## Classificação comprovada
+
+| Componente | Conteúdo observado | Consumidor comprovado | Runtime oficial |
+|---|---|---|---|
+| `bin/` | 145,55 MB em dois executáveis Windows | `ProcessManagerService` do painel Swing | Não |
+| `site/` | 128,07 MB; 14.501 arquivos preexistentes, quase todos imagens, além de HTML/TSX | Nenhum consumidor de filesystem comprovado | Não |
+| `Hwid/` | INI do patch e imagem de referência | Nenhum consumidor no servidor | Não |
+| `libs/` | 125,53 MB de dependências vendorizadas e checksums | Gradle, fat JAR, launchers diretos e extensões | Sim, parcialmente |
+| `tools/` | runtime oficial, SQL legado, rede e scripts one-shot | Desenvolvimento/administração | Somente `tools/runtime/` |
+| `brproject-data/` | exemplos de configuração remanescentes | scripts/painel de preparação legados | Não no Compose |
+
+## Decisões
+
+### Site e Game API
+
+`modules/game-api` é parte do servidor e define o contrato de integração. A
+pasta `site/` não é esse módulo: é somente uma entrega estática sem consumidor
+comprovado no código. Um site deve consumir a Game API autenticada e não
+receber credenciais JDBC nem compartilhar o schema como contrato de aplicação.
+
+O Compose oficial não inicia o site porque não há, neste repositório, uma fonte
+capaz de reproduzir `site-native.exe`, nem evidência de que o executável leia o
+snapshot `site/`. A futura inclusão exige código-fonte, testes do contrato HTTP,
+imagem própria, healthcheck e configuração explícita.
+
+### Binários Windows
+
+Os binários permanecem no caminho atual para não quebrar o painel Swing. Eles
+são opcionais e excluídos do contexto Docker. Seus checksums são protegidos por
+teste, mas isso não substitui assinatura, SBOM ou revisão de licença.
+
+### HWID
+
+`Hwid/` pertence ao pacote do cliente. Não deve ser confundido com o código de
+proteção HWID do GameServer. A extração para um repositório do client patch é
+segura do ponto de vista do servidor, mas fica adiada até existir um processo
+de distribuição do cliente.
+
+### Bibliotecas
+
+`libs/` ainda cruza build e runtime legado. O fat JAR é reproduzível e não é
+versionado, mas as dependências vendorizadas só poderão sair depois que cada
+consumidor tiver uma dependência Gradle ou artefato publicado equivalente.
+
+## Regras de dependência
+
+1. Docker oficial pode consumir fonte, `game/`, `login/`, `database/`,
+   `deploy/` e dependências de `libs/`, mas não `bin/`, `site/` ou `Hwid/`.
+2. O núcleo do servidor não pode passar a ler arquivos de `site/` ou `Hwid/`.
+3. Integrações web passam por `modules/game-api`; acesso direto do site ao JDBC
+   não é um contrato suportado.
+4. Novos scripts operacionais entram em `tools/runtime/`.
+5. Alterar binários opacos exige checksum, procedência e revisão explícita.
+
+Essas regras são verificadas por `checkComponentBoundaries` no build Gradle.

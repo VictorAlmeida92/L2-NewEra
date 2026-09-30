@@ -235,11 +235,94 @@ tasks.register("checkRuntimeScripts") {
     }
 }
 
+tasks.register("checkComponentBoundaries") {
+    group = "verification"
+    description = "Protects the boundary between the official server and optional legacy components"
+
+    doLast {
+        val boundaryDocs = listOf(
+            "docs/architecture/component-boundaries.md",
+            "bin/README.md",
+            "Hwid/README.md",
+            "site/README.md",
+            "libs/README.md",
+            "tools/README.md",
+        ).map(rootProject::file)
+        val missingDocs = boundaryDocs.filterNot { it.isFile }.map { it.relativeTo(rootProject.projectDir).path }
+        if (missingDocs.isNotEmpty())
+            throw GradleException("Missing component boundary documentation: $missingDocs")
+
+        val dockerIgnore = rootProject.file(".dockerignore").readLines().map { it.trim() }.toSet()
+        val missingDockerExcludes = listOf("bin", "Hwid", "site").filterNot(dockerIgnore::contains)
+        if (missingDockerExcludes.isNotEmpty())
+            throw GradleException("Optional components leaked into the official Docker context: $missingDockerExcludes")
+
+        val compose = rootProject.file("deploy/docker/docker-compose.yml").readText()
+        val forbiddenComposeReferences = listOf("bin/", "Hwid/", "../site", "../../site")
+            .filter(compose::contains)
+        if (forbiddenComposeReferences.isNotEmpty())
+            throw GradleException("Official Compose references optional legacy components: $forbiddenComposeReferences")
+
+        val processManager = rootProject.file(
+            "modules/game-server-core/src/main/java/ext/mods/commons/gui/services/ProcessManagerService.java"
+        ).readText()
+        val requiredLegacyPaths = listOf("bin/site-native", "bin/cloudflared")
+        val missingLegacyPaths = requiredLegacyPaths.filterNot(processManager::contains)
+        if (missingLegacyPaths.isNotEmpty())
+            throw GradleException("Legacy GUI compatibility paths were removed without migration: $missingLegacyPaths")
+
+        val accidentalCoupling = rootProject.fileTree("modules") {
+            include("**/*.java", "**/*.kt")
+            exclude("**/ProcessManagerService.java", "**/src/test/**", "**/build/**", "**/bin/**")
+        }.flatMap { file ->
+            file.readLines().mapIndexedNotNull { index, line ->
+                val filesystemMarkers = listOf(
+                    "new File(\"Hwid/", "new File(\"Hwid\\\\",
+                    "new File(\"site/", "new File(\"site\\\\",
+                    "Path.of(\"Hwid/", "Path.of(\"site/",
+                    "Paths.get(\"Hwid/", "Paths.get(\"site/",
+                    "resolve(\"Hwid/", "resolve(\"site/",
+                )
+                if (filesystemMarkers.any(line::contains))
+                    "${file.path}:${index + 1}"
+                else null
+            }
+        }
+        if (accidentalCoupling.isNotEmpty())
+            throw GradleException("Server source depends directly on client/site snapshots: $accidentalCoupling")
+
+        fun sha256(file: File): String {
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().buffered().use { input ->
+                val buffer = ByteArray(64 * 1024)
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    digest.update(buffer, 0, read)
+                }
+            }
+            return digest.digest().joinToString("") { byte -> "%02x".format(byte) }
+        }
+
+        val checksumRoot = rootProject.file("bin")
+        val checksumFile = checksumRoot.resolve("CHECKSUMS.sha256")
+        val checksumFailures = checksumFile.readLines()
+            .filter { it.isNotBlank() && !it.trimStart().startsWith("#") }
+            .map { line -> line.trim().split(Regex("\\s+"), limit = 2) }
+            .filter { parts -> parts.size != 2 || !checksumRoot.resolve(parts[1]).isFile || sha256(checksumRoot.resolve(parts[1])) != parts[0].lowercase() }
+        if (checksumFailures.isNotEmpty())
+            throw GradleException("Opaque binary checksum mismatch: $checksumFailures")
+
+        logger.lifecycle("Component boundary contract: clean")
+    }
+}
+
 tasks.named("build") {
     dependsOn("checkDatabaseSql")
     dependsOn("checkDatabaseConnectionBoundary")
     dependsOn("checkPersistenceConstructionBoundary")
     dependsOn("checkRuntimeScripts")
+    dependsOn("checkComponentBoundaries")
 }
 
 tasks.register("brCompileIncremental") {

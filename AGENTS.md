@@ -108,6 +108,13 @@ novos scripts soltos. Os launchers `StartLogin_SemDashboard.*`,
 `StartGame_SemDashboard.*` e `StartBrproject.*` são compatibilidade legada por
 JAR/GUI até seus consumidores serem isolados.
 
+As fronteiras de componentes opcionais estão documentadas em
+[`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md).
+`bin/`, `site/` e `Hwid/` não pertencem ao runtime Docker oficial. O site deve
+integrar-se pela `game-api`, nunca por JDBC direto; binários opacos exigem
+checksum e revisão explícita; material de client patch não deve ser acoplado ao
+código do servidor. `checkComponentBoundaries` protege essas regras.
+
 ### Fase 4.1 — normalização estrutural do projeto
 
 Objetivo: separar claramente código-fonte, dados versionáveis, runtime, artefatos gerados e ferramentas legadas, preservando o comportamento do servidor. Esta fase não deve ser executada como uma grande movimentação de pastas; cada fronteira deve ser validada em uma PR independente ou em um pequeno grupo de PRs relacionadas.
