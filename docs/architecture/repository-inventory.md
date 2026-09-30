@@ -57,10 +57,9 @@ flowchart TD
 
 1. `modules/app-dist/build.gradle.kts` gera o fat JAR diretamente em
    `libs/server.jar`.
-2. Os Dockerfiles de LoginServer, GameServer e migrations copiam
-   `libs/server.jar`; portanto um clone limpo ainda não consegue executar
-   `docker compose build` sem uma etapa de build dentro do Docker ou um
-   artefato publicado.
+2. Os Dockerfiles de LoginServer, GameServer e migrations compilam a
+   distribuição no estágio de build e copiam o `libs/server.jar` gerado;
+   portanto um clone limpo não depende de um JAR versionado.
 3. O GameServer ainda usa algumas bibliotecas vendorizadas de `libs/`, como
    `DeepL.jar`, `ApiPix.jar`, `Kamaloka.ext.jar` e `interface.ext.jar`.
 4. `deploy/docker/docker-compose.yml` usa PostgreSQL e o serviço `migrate`
@@ -81,13 +80,12 @@ fonte + configs + migrations + dados necessários
  Docker build / GitHub Release / registry de imagens
 ```
 
-Antes de remover `libs/server.jar` do índice, uma PR própria deve:
+O contrato reproduzível para remover `libs/server.jar` do índice é:
 
-- adaptar os Dockerfiles para compilar ou receber explicitamente o artefato;
+- manter os Dockerfiles compilando ou recebendo explicitamente o artefato;
 - adaptar scripts locais que pressupõem sua existência;
 - validar `clone limpo → build → migrations → Compose → LoginServer → GameServer`;
-- adicionar a regra de ignore somente depois que o pipeline reproduzível estiver
-  funcionando;
+- manter a regra de ignore e o gate de clone limpo funcionando;
 - preservar checksums e metadados das dependências vendorizadas sem commitar
   estado de execução.
 
@@ -98,7 +96,7 @@ Antes de remover `libs/server.jar` do índice, uma PR própria deve:
 3. Consolidação de migrations, seeds e fixtures.
 4. Wrapper oficial de build/start/deploy, mantendo compatibilidade temporária — concluído em `feature/47-official-runtime-scripts`.
 5. Isolamento documentado de site, ferramentas e componentes legados — concluído em `feature/48-legacy-component-boundaries`.
-6. CI, publicação reproduzível e validação de clone limpo.
+6. CI, publicação reproduzível e validação de clone limpo — implementado em `feature/49-reproducible-build-validation`.
 
 ## Riscos conhecidos
 

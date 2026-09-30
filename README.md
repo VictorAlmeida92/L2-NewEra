@@ -675,6 +675,9 @@ possuem fronteiras próprias e não entram nas imagens do servidor. Consulte
 [`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md)
 antes de alterar `site/`, `bin/`, `Hwid/` ou `libs/`.
 
+O contrato de clone limpo, CI e build reproduzível está em
+[`docs/architecture/reproducible-build.md`](docs/architecture/reproducible-build.md).
+
 ### Executando com Docker Compose
 
 A pasta `deploy/docker/` fornece a stack reproduzível atual (`db` + `migrate` +
