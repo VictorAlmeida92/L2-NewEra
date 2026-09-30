@@ -35,7 +35,9 @@ jobs:
 
       - name: Assert generated distribution is not versioned
         shell: bash
-        run: test ! -e libs/server.jar
+        run: |
+          test ! -e libs/server.jar
+          chmod +x gradlew
 
       - name: Run build, tests and boundary checks
         run: >-
