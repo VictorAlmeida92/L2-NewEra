@@ -5,7 +5,7 @@ Flyway migrations organized by database vendor.
 ## Structure
 
 ```
-migrations/
+database/migrations/
 ├── mariadb/    ← MariaDB/MySQL legacy-compatible schema
 ├── postgresql/ ← PostgreSQL (official server database)
 ├── sqlite/     ← SQLite (zero-config, dev/demo)

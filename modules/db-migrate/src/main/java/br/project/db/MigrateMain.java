@@ -15,7 +15,7 @@ import ext.mods.commons.jdbc.DatabaseDialect;
 import ext.mods.commons.jdbc.SupportedDatabase;
 
 /**
- * Phase 5 CLI entry for applying brproject-data Flyway migrations.
+ * CLI entry for applying the canonical Flyway migrations under database/.
  *
  * <pre>
  * java -jar ... br.project.db.MigrateMain \
@@ -76,19 +76,19 @@ public final class MigrateMain
 	{
 		if (url == null)
 		{
-			return "brproject-data/migrations/mariadb";
+			return "database/migrations/mariadb";
 		}
 		final String normalized = url.toLowerCase();
 		if (normalized.startsWith("jdbc:sqlite:"))
 		{
-			return "brproject-data/migrations/sqlite";
+			return "database/migrations/sqlite";
 		}
 		if (normalized.startsWith("jdbc:postgresql:"))
 		{
-			return "brproject-data/migrations/postgresql";
+			return "database/migrations/postgresql";
 		}
 		// MariaDB / MySQL / SQLServer / H2 use the legacy MariaDB-compatible subtree.
-		return "brproject-data/migrations/mariadb";
+		return "database/migrations/mariadb";
 	}
 
 	private static void seedGameServer(String url, String user, String password, String hexid, String host)

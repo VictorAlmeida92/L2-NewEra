@@ -3,10 +3,11 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DATA="${ROOT}/brproject-data"
+DATABASE="${ROOT}/database"
 GAME_CFG="${ROOT}/game/config"
 LOGIN_CFG="${ROOT}/login/config"
 
-echo "brproject-data VERSION=$(cat "${DATA}/VERSION" 2>/dev/null || echo unknown)"
+echo "database VERSION=$(cat "${DATABASE}/VERSION" 2>/dev/null || echo unknown)"
 
 mkdir -p "${GAME_CFG}" "${LOGIN_CFG}"
 

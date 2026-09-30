@@ -76,7 +76,7 @@ tasks.register("compileAll") {
 tasks.register("build") {
     group = "build"
     description = "Tests SPI + packages server.jar"
-    dependsOn(":extensions-spi:test", ":game-server-core:test", ":mod-pix:test", ":proxy:test", ":app-dist:jar", ":db-migrate:compileJava")
+    dependsOn(":extensions-spi:test", ":game-server-core:test", ":mod-pix:test", ":proxy:test", ":app-dist:jar", ":db-migrate:test")
 }
 
 tasks.register("compileJava") {

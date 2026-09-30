@@ -20,7 +20,7 @@ flowchart TD
     Root --> Source[modules/\nfonte Java/Kotlin e módulos]
     Root --> Build[Gradle\nbuild.gradle.kts settings.gradle.kts gradlew]
     Root --> GameData[game/data\nconfigs, XMLs, geodata e spawns]
-    Root --> Database[brproject-data/\nmigrations, seeds e dados versionáveis]
+    Root --> Database[database/\nmigrations, seeds e fixtures]
     Root --> Deploy[deploy/docker\nCompose, Dockerfiles e entrypoints]
     Root --> Docs[docs/\narquitetura e banco]
     Root --> Dist[libs/server.jar\nartefato gerado atualmente versionado]
@@ -41,7 +41,7 @@ flowchart TD
 | `modules/` | Código Java/Kotlin e módulos opcionais | Fonte | Manter como fonte principal; não reorganizar pacotes nesta fase |
 | `build.gradle.kts`, `settings.gradle.kts`, `gradle/`, `gradlew*` | Compilação e composição | Build | Manter na raiz; serão a fonte oficial de builds reproduzíveis |
 | `game/data/` | XMLs, configurações, spawns e geodata | Dados/configuração versionáveis | Manter; separar runtime em regras específicas, não pela extensão |
-| `brproject-data/migrations/` | Migrations e seeds do banco oficial | Dados de banco versionáveis | Manter como origem oficial do Compose |
+| `database/` | Migrations, seeds, fixtures e metadados do banco oficial | Dados de banco versionáveis | Origem canônica do Compose e dos testes |
 | `deploy/docker/` | Dockerfiles, Compose e entrypoints | Deployment | Manter como caminho oficial; validar clone limpo antes de alterar |
 | `docs/` | Documentação mantida pelo projeto | Documentação | Manter documentação arquitetural e de banco versionada |
 | `libs/server.jar` | Fat JAR produzido por `:app-dist:jar` | Artefato gerado | Remover do Git em etapa própria após adaptar Docker/scripts |

@@ -16,7 +16,7 @@ WORKDIR /opt/brproject
 
 COPY --from=build --chown=brproject:brproject /src/libs/server.jar /opt/brproject/app.jar
 COPY --from=build --chown=brproject:brproject /src/libs/ /opt/brproject/libs/
-COPY --chown=brproject:brproject brproject-data/migrations /opt/brproject/brproject-data/migrations
+COPY --chown=brproject:brproject database/migrations /opt/brproject/database/migrations
 COPY --chown=brproject:brproject deploy/docker/run-migrate.sh /opt/brproject/run-migrate.sh
 
 RUN sed -i 's/\r$//' /opt/brproject/run-migrate.sh \

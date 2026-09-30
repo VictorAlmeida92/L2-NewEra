@@ -78,7 +78,7 @@ As seguintes regras valem para mudanças de arquitetura:
 
 ## Estado do roadmap
 
-Atualizado em 2026-09-29:
+Atualizado em 2026-09-30:
 
 - O problema de login e seleção de personagens observado após a atualização da infraestrutura foi considerado resolvido; o stack PostgreSQL, LoginServer e GameServer está operacional após a reinicialização do ambiente.
 - A Fase 1 (documentação, proteção e compatibilidade), a Fase 2 (fluxos críticos) e a Fase 3 (sistemas secundários) foram concluídas e integradas na `main`.
@@ -87,11 +87,19 @@ Atualizado em 2026-09-29:
 - A Fase 4.1 foi adicionada como etapa oficial para depois da Fase 4 e antes da Fase 5. Ela trata a normalização estrutural do repositório, sem reescrever o motor de pacotes ou o núcleo do jogo.
 - Depois da Fase 4.1, permanecem como trabalho estrutural a matriz automatizada PostgreSQL/MariaDB, testes de persistência mais amplos e o endurecimento do deployment para AWS/produção.
 
+- O layout canônico de banco é `database/`; novos migrations, seeds e fixtures
+  não devem ser criados em `db/`, `data/`, `deploy/docker` ou `brproject-data`.
+
 O primeiro bloco da Fase 4.1 foi iniciado na branch `feature/44-structural-normalization`.
 O inventário e as dependências críticas estão documentados em
 [`docs/architecture/repository-inventory.md`](docs/architecture/repository-inventory.md).
 As movimentações e a remoção de artefatos gerados permanecem bloqueadas até que
 o pipeline reproduzível correspondente seja validado.
+
+O bloco de banco da Fase 4.1 consolidou o layout canônico em `database/`.
+O Compose, o runner Flyway e os testes devem consumir essa raiz; `tools/sql/`
+permanece apenas como fonte legada do gerador, e `brproject-data/` mantém
+temporariamente exemplos de configuração.
 
 ### Fase 4.1 — normalização estrutural do projeto
 

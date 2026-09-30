@@ -64,6 +64,11 @@ data/*.sqlite-*
 data/*.db
 data/*.db-*
 data/*.bak
+data/*.sql
+db/*.sql
+db/*.db
+db/*.db-*
+db/*.sqlite
 db/fail2ban.sqlite*
 db/*.sqlite-*
 data/certs/

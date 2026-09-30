@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Convert the MariaDB HeidiSQL dump at data/Backup.sql into SQLite.
+"""Convert an explicitly supplied MariaDB/HeidiSQL dump into SQLite.
 
 Designed for BrProject:
-- creates SQLite schema from db/migrations/sqlite/000_schema.sql;
+- creates SQLite schema from the canonical SQLite Flyway baseline;
 - applies mandatory high-performance PRAGMAs;
 - loads HeidiSQL REPLACE INTO batches as INSERT OR REPLACE;
 - handles semicolons and commas inside quoted strings.
@@ -52,9 +52,9 @@ def normalize_insert(stmt: str) -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument('--input', default='data/Backup.sql')
-    ap.add_argument('--schema', default='db/migrations/sqlite/000_schema.sql')
-    ap.add_argument('--indexes', default='db/migrations/sqlite/001_indexes.sql')
+    ap.add_argument('--input', required=True, help='Path to a local MariaDB/HeidiSQL dump (not versioned)')
+    ap.add_argument('--schema', default='database/migrations/sqlite/V1.0.0__baseline_schema.sql')
+    ap.add_argument('--indexes', default='database/migrations/sqlite/R__sqlite_hot_path_indexes.sql')
     ap.add_argument('--output', default='data/db/brproject.sqlite')
     args = ap.parse_args()
 

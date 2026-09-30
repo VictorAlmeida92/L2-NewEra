@@ -16,7 +16,7 @@ java {
 }
 
 val dbUrl = providers.gradleProperty("dbUrl")
-    .orElse("jdbc:mariadb://localhost:3306/l2jdb?useUnicode=true&characterEncoding=UTF-8")
+    .orElse("jdbc:postgresql://localhost:5433/l2jdb")
 val dbUser = providers.gradleProperty("dbUser").orElse("brproject")
 val dbPassword = providers.gradleProperty("dbPassword").orElse("brproject")
 
@@ -29,6 +29,9 @@ dependencies {
     runtimeOnly("org.xerial:sqlite-jdbc:3.46.1.0")
     runtimeOnly("org.postgresql:postgresql:42.7.4")
     runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11")
+
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 application {
@@ -41,6 +44,11 @@ tasks.named<JavaExec>("run") {
         "--user=${dbUser.get()}",
         "--password=${dbPassword.get()}",
     )
+    workingDir = rootProject.projectDir
+}
+
+tasks.test {
+    useJUnitPlatform()
     workingDir = rootProject.projectDir
 }
 

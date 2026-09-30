@@ -1,34 +1,20 @@
-# brproject-data
+# brproject-data (compatibilidade temporária)
 
-Versioned **schema + config examples** pack for BrProject (Phase 5).
+Esta pasta mantém somente os exemplos de configuração usados pelos wrappers
+legados. As migrations, seeds e fixtures oficiais foram consolidadas em
+[`../database`](../database/README.md).
 
 Game XML/HTML under `game/data/` remains in the main tree (or a future split).  
 This pack owns:
 
 | Path | Purpose |
 |------|---------|
-| `VERSION` | SemVer of this data pack (must match release notes) |
-| `migrations/` | Flyway SQL (`V*_*.sql`) |
 | `config-examples/` | Safe templates (no secrets) |
-| `SQL_MANIFEST.txt` | Ordered list of source files from `tools/sql` |
 
 ## Version policy
 
-- Tag format: `data-vX.Y.Z` (optional) or ship as folder next to `server.jar` with same app version.
-- Server reads DB via Flyway at migrate time; runtime does not require this folder after migrate.
-
-## Apply schema
-
-```bash
-# From repo root (Gradle Flyway module)
-./gradlew :db-migrate:flywayMigrate \
-  -PdbUrl=jdbc:mariadb://localhost:3306/l2jdb \
-  -PdbUser=brproject \
-  -PdbPassword=brproject
-
-# Or helper script
-./tools/migrate-db.sh
-```
+- Esta pasta será removida quando os exemplos forem movidos para a estrutura
+  canônica de configuração.
 
 ## Sync examples into local runtime
 
@@ -38,8 +24,4 @@ This pack owns:
 
 Copies `config-examples` → `game/config/*.example` and `login/config/*.example` (never overwrites live secrets).
 
-## Regenerate Flyway baseline from `tools/sql`
-
-```bash
-python3 tools/generate_flyway_migrations.py
-```
+Para migrations e geração do baseline, consulte [`database/README.md`](../database/README.md).

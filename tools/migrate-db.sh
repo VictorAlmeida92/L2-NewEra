@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "${ROOT}"
 
-DB_URL="${DB_URL:-jdbc:mariadb://localhost:3306/l2jdb?useUnicode=true&characterEncoding=UTF-8}"
+DB_URL="${DB_URL:-jdbc:postgresql://localhost:5433/l2jdb}"
 DB_USER="${DB_USER:-brproject}"
 DB_PASSWORD="${DB_PASSWORD:-brproject}"
 
