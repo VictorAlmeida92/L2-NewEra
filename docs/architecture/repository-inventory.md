@@ -1,6 +1,6 @@
 # Inventário estrutural do L2 NewEra
 
-Atualizado em 2026-09-29. Este documento é o ponto de partida da Fase 4.1 —
+Atualizado em 2026-09-30. Este documento é o ponto de partida da Fase 4.1 —
 normalização estrutural do projeto.
 
 ## Objetivo
@@ -50,7 +50,8 @@ flowchart TD
 | `bin/` | `cloudflared.exe` e `site-native.exe` | Ferramenta/legado | Mapear consumidores antes de separar ou remover |
 | `Hwid/` | `Capturar.JPG` e configuração/artefato de HWID | Legado/ferramenta | Identificar uso real antes de mover; não faz parte do núcleo do servidor |
 | `site/` | Código e artefatos do site integrado | Componente integrado | Documentar fronteira; extração para outro repositório é decisão futura |
-| scripts `.bat`, `.sh`, `.ps1`, `.vbs`, `.command` | Inicialização e compatibilidade de ambientes | Wrappers de operação | Consolidar depois de medir referências; manter wrappers durante a transição |
+| `tools/runtime/` e `StartL2NewEra.*` | Interface operacional Docker | Ferramenta oficial | Manter como contrato canônico de build/start/stop/status/logs |
+| demais scripts `.bat`, `.sh`, `.ps1`, `.vbs`, `.command` | Inicialização direta por JAR e compatibilidade de ambientes | Wrappers legados | Manter enquanto houver consumidores na GUI, Gradle e classes Java; não usar como runtime oficial |
 
 ## Dependências críticas encontradas
 
@@ -95,7 +96,7 @@ Antes de remover `libs/server.jar` do índice, uma PR própria deve:
 1. Inventário e mapa estrutural — esta PR.
 2. Política de artefatos e remoção segura do `server.jar` versionado.
 3. Consolidação de migrations, seeds e fixtures.
-4. Wrapper oficial de build/start/deploy, mantendo compatibilidade temporária.
+4. Wrapper oficial de build/start/deploy, mantendo compatibilidade temporária — concluído em `feature/47-official-runtime-scripts`.
 5. Isolamento documentado de site, ferramentas e componentes legados.
 6. CI, publicação reproduzível e validação de clone limpo.
 
