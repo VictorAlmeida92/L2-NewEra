@@ -8,12 +8,15 @@ stack até terem uma imagem e um contrato de configuração próprios.
 ## Pré-requisitos
 
 - Docker Desktop com WSL 2 habilitado;
-- distribuição compilada com `libs/server.jar`.
+- distribuição compilada durante o build Docker com `:app-dist:jar`.
 
 Na raiz do projeto:
 
 ```bash
 ./gradlew :app-dist:jar
+
+# O JAR é gerado em libs/server.jar apenas como artefato local temporário.
+# Ele não é necessário no checkout para construir as imagens.
 cp .env.example .env
 ```
 
@@ -22,7 +25,8 @@ Altere as senhas de `.env` antes de expor qualquer porta fora da máquina local.
 ## Subir
 
 ```bash
-docker compose --env-file .env -f deploy/docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f deploy/docker/docker-compose.yml build
+docker compose --env-file .env -f deploy/docker/docker-compose.yml up -d
 ```
 
 O serviço `migrate` executa as migrations PostgreSQL e registra o GameServer
