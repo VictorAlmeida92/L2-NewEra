@@ -44,6 +44,32 @@ O endpoint atual de `reset-password` não é um fluxo de recuperação por e-mai
 ele recebe login e nova senha. Ele não deve ser exposto publicamente até ser
 substituído por tokens de recuperação.
 
+## Account API inicial
+
+A primeira implementação server-side está no módulo Kotlin/Netty existente,
+sem introduzir Spring, Ktor ou outro framework. Nesta etapa ela roda no mesmo
+processo do GameServer, em uma porta separada, para reduzir risco operacional;
+o contrato permite extraí-la para um serviço próprio posteriormente.
+
+Rotas implementadas:
+
+| Método | Rota | Autenticação |
+|---|---|---|
+| `GET` | `/api/account/health` | nenhuma, apenas health check local |
+| `POST` | `/api/account/register` | nenhuma; rate limit e validação |
+| `POST` | `/api/account/login` | credenciais; retorna sessão opaca |
+| `GET` | `/api/account/me` | `Authorization: Bearer` |
+| `POST` | `/api/account/logout` | `Authorization: Bearer` |
+| `POST` | `/api/account/change-password` | sessão + senha atual |
+
+Por padrão, `AccountApiEnabled = False` e o bind permitido é loopback. Para
+produção, o endpoint deve ficar atrás de TLS, reverse proxy, rate limiting de
+borda e domínio permitido por `AccountApiAllowedOrigins`.
+
+A sessão é mantida em memória nesta primeira entrega; reiniciar o GameServer
+invalida as sessões web. Persistência de sessão, verificação de e-mail e reset
+por token são deliberadamente deixados para a próxima etapa.
+
 ## Próxima entrega
 
 A próxima branch deverá criar as migrations e o serviço de recuperação:

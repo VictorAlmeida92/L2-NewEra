@@ -11,6 +11,10 @@ O cadastro, login, verificação de e-mail e recuperação de senha serão
 implementados por uma Account API/BFF server-side. Essa API chamará a Game API
 interna por HMAC em uma rede privada.
 
+Na primeira entrega, a Account API existe dentro do processo do GameServer,
+com porta separada e bind de loopback. O frontend ainda não habilita seus
+formulários até que HTTPS, proxy reverso e a etapa de e-mail estejam prontos.
+
 ## Desenvolvimento
 
 Requer Node.js e pnpm:

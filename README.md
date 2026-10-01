@@ -516,6 +516,15 @@ Serviço Netty HTTP interno de altíssima performance embutido no GameServer (po
 - **Documentação & Portal Interativo**:
   - 🌐 **Portal HTML Interativo com Tailwind CSS**: [**`docs_api/game_api_integration_guide.html`**](docs_api/game_api_integration_guide.html) (com busca instantânea, abas de payloads e snippets prontos em cURL, JavaScript, Kotlin e Python).
 
+### Account API server-side
+
+O BFF de contas é uma API Kotlin/Netty separada por porta e desabilitada por
+padrão. Rotas iniciais: `GET /api/account/health`, `POST /api/account/register`,
+`POST /api/account/login`, `GET /api/account/me`, `POST /api/account/logout` e
+`POST /api/account/change-password`. Ela usa sessões opacas, rate limit e bind
+de loopback; não recebe o segredo HMAC no navegador e não expõe JDBC ao portal.
+Detalhes: [`docs/architecture/account-portal.md`](docs/architecture/account-portal.md).
+
 ### Cluster HPC & Telemetria Intel PCM (`:cluster-hpc`)
 
 Módulo de computação de alta performance e persistência sem bloqueios:

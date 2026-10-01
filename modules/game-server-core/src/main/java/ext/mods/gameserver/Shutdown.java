@@ -207,6 +207,7 @@ public class Shutdown extends Thread
 				}
 				ext.mods.gameserver.network.netty.NettyGameServer.getInstance().shutdown();
 				GameApiServer.stopFromGameServer();
+				ext.mods.gameapi.account.AccountApiServer.stopFromGameServer();
 			}
 			catch (Exception e)
 			{

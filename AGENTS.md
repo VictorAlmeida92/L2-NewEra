@@ -193,3 +193,8 @@ não é uma recuperação pública segura e não deve ser exposto.
 
 O contrato e a arquitetura estão documentados em
 [`docs/architecture/account-portal.md`](docs/architecture/account-portal.md).
+
+A Account API inicial deve continuar em Kotlin/Netty, usando a infraestrutura
+HTTP já existente no módulo `game-api`; não introduzir outro framework web sem
+ADR e comparação de custo operacional. Ela deve permanecer desabilitada por
+padrão, em loopback, até que exista TLS/reverse proxy e testes de segurança.
