@@ -12,7 +12,7 @@ até que seus consumidores sejam migrados e testados.
 | `deploy/` | Docker Compose e Dockerfiles oficiais | deployment reproduzível |
 | `tools/runtime/` | comandos oficiais de operação | novos comandos entram aqui |
 | `docs/` | documentação mantida | não misturar logs ou artefatos |
-| `apps/account-portal/` | frontend React público | build independente e sem segredos |
+| `L2-NewEra-Frontend` (repositório separado) | frontend React público | build independente, Pages e sem segredos |
 | `site/` | snapshot web legado | não tratar como fonte reproduzível |
 | `Hwid/`, `bin/` | componentes legados/cliente | isolar, catalogar e só então extrair |
 | `build/`, `.gradle/`, `.kotlin/`, `cache/`, `logs/` | estado gerado/runtime | ignorado e nunca versionado |

@@ -181,9 +181,12 @@ validação específica.
 
 ### Portal de contas
 
-O portal público será desenvolvido em `apps/account-portal/` com React/Vite e
-publicado como frontend estático pelo GitHub Pages. Ele nunca pode conter
-`GameApiSecret`, credenciais JDBC ou acesso direto ao PostgreSQL.
+O portal público vive no repositório independente
+[`L2-NewEra-Frontend`](https://github.com/VictorAlmeida92/L2-NewEra-Frontend),
+com React/Vite e publicação estática pelo GitHub Pages. O backend deste
+repositório não deve conter o build do frontend nem workflow de Pages. O portal
+nunca pode conter `GameApiSecret`, credenciais JDBC ou acesso direto ao
+PostgreSQL.
 
 Cadastro, login web, verificação de e-mail e recuperação de senha devem passar
 por uma Account API/BFF server-side. Essa API conversa com a Game API interna
@@ -193,6 +196,8 @@ não é uma recuperação pública segura e não deve ser exposto.
 
 O contrato e a arquitetura estão documentados em
 [`docs/architecture/account-portal.md`](docs/architecture/account-portal.md).
+Durante a transição, a cópia histórica do frontend foi extraída para o
+repositório independente e o backend mantém somente a documentação do contrato.
 
 A Account API inicial deve continuar em Kotlin/Netty, usando a infraestrutura
 HTTP já existente no módulo `game-api`; não introduzir outro framework web sem

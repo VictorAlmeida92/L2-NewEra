@@ -96,10 +96,10 @@ secrets/
 **/license.xml
 **/data/license.xml
 
+# Local dependencies and build output for independently versioned apps
+apps/*/node_modules/
+apps/*/dist/
+
 # Local config backup (never commit)
 .local-config-backup/
-
-# React account portal build outputs and local dependencies
-apps/account-portal/node_modules/
-apps/account-portal/dist/
 

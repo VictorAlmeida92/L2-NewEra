@@ -2,8 +2,10 @@
 
 ## Decisão
 
-O frontend será React/Vite e será publicado como conteúdo estático no GitHub
-Pages. O GitHub Pages não executa backend, não envia e-mails e não pode guardar
+O frontend é React/Vite e é publicado como conteúdo estático no GitHub Pages,
+no repositório independente
+[`L2-NewEra-Frontend`](https://github.com/VictorAlmeida92/L2-NewEra-Frontend).
+O GitHub Pages não executa backend, não envia e-mails e não pode guardar
 segredos.
 
 ```mermaid
@@ -69,6 +71,17 @@ borda e domínio permitido por `AccountApiAllowedOrigins`.
 A sessão é mantida em memória nesta primeira entrega; reiniciar o GameServer
 invalida as sessões web. Persistência de sessão, verificação de e-mail e reset
 por token são deliberadamente deixados para a próxima etapa.
+
+## Separação de repositórios
+
+O frontend já foi extraído e publicado em:
+
+- repositório: <https://github.com/VictorAlmeida92/L2-NewEra-Frontend>;
+- site: <https://victoralmeida92.github.io/L2-NewEra-Frontend/>.
+
+O repositório `L2-NewEra` permanece responsável pelo GameServer, LoginServer,
+Account API e infraestrutura Docker. A URL do frontend é configuração de borda;
+ela não transforma a Account API local em endpoint público.
 
 ## Próxima entrega
 
