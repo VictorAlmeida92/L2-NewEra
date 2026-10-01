@@ -678,6 +678,9 @@ antes de alterar `site/`, `bin/`, `Hwid/` ou `libs/`.
 O contrato de clone limpo, CI e build reproduzível está em
 [`docs/architecture/reproducible-build.md`](docs/architecture/reproducible-build.md).
 
+O contrato para a preparação do ambiente de produção está em
+[`docs/deployment/production-readiness.md`](docs/deployment/production-readiness.md).
+
 ### Executando com Docker Compose
 
 A pasta `deploy/docker/` fornece a stack reproduzível atual (`db` + `migrate` +
