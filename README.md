@@ -765,6 +765,7 @@ BrProject-2026/
 │   ├── app-dist/                    # Distribuição / montagem do libs/server.jar
 │   └── mods/                        # 19 First-Party Mods desacoplados (mod-*)
 ├── database/                        # Migrations, seeds, fixtures e metadados de banco
+├── apps/account-portal/              # Frontend React público, sem segredos
 ├── brproject-data/                  # Compatibilidade temporária de config-examples
 ├── deploy/                          # Dockerfiles e docker-compose.yml
 ├── game/                            # Raiz de execução do GameServer (data/ e config/)
@@ -774,6 +775,11 @@ BrProject-2026/
 ├── build.gradle.kts                 # Orquestração do build multi-module
 └── settings.gradle.kts              # Declaração dos 14 módulos e 19 mods
 ```
+
+O portal de contas está sendo introduzido separadamente do runtime do jogo.
+Consulte [`docs/architecture/account-portal.md`](docs/architecture/account-portal.md)
+e [`apps/account-portal/README.md`](apps/account-portal/README.md) antes de
+conectar qualquer frontend à API interna.
 
 ---
 
