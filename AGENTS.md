@@ -93,8 +93,9 @@ Atualizado em 2026-09-30:
 O primeiro bloco da Fase 4.1 foi iniciado na branch `feature/44-structural-normalization`.
 O inventário e as dependências críticas estão documentados em
 [`docs/architecture/repository-inventory.md`](docs/architecture/repository-inventory.md).
-As movimentações e a remoção de artefatos gerados permanecem bloqueadas até que
-o pipeline reproduzível correspondente seja validado.
+As movimentações de componentes legados continuam bloqueadas até análise
+individual, mas a remoção do JAR gerado já possui validação reproduzível em
+`.github/workflows/ci.yml`.
 
 O bloco de banco da Fase 4.1 consolidou o layout canônico em `database/`.
 O Compose, o runner Flyway e os testes devem consumir essa raiz; `tools/sql/`
@@ -126,10 +127,10 @@ Escopo oficial:
 3. Definir a publicação de artefatos por GitHub Actions, GitHub Releases e/ou registro de imagens Docker, sem usar o Git como armazenamento de binários gerados.
 4. Consolidar migrations, seeds, fixtures e documentação de banco em uma estrutura única, mantendo compatibilidade temporária com os caminhos legados.
 5. Definir um fluxo oficial de inicialização local e de validação, reduzindo a duplicação entre scripts `.bat`, `.sh`, `.ps1`, `.vbs` e `.command`.
-6. Isolar e documentar `Hwid`, `bin`, `site`, `libs` e demais componentes legados antes de mover ou remover qualquer arquivo.
+6. Isolar e documentar `Hwid`, `bin`, `site`, `libs` e demais componentes legados antes de mover ou remover qualquer arquivo — concluído em `feature/48-legacy-component-boundaries`.
 7. Separar documentação mantida manualmente de documentação gerada, logs, caches e estado de runtime.
-8. Registrar os limites entre o servidor, o site e ferramentas administrativas, preparando eventual extração para repositórios independentes sem fazê-la prematuramente.
-9. Criar validação de clone limpo: build, testes, migrations, Docker Compose, LoginServer, GameServer, login do cliente, criação de personagem e persistência no PostgreSQL.
+8. Registrar os limites entre o servidor, o site e ferramentas administrativas, preparando eventual extração para repositórios independentes sem fazê-la prematuramente — concluído em `feature/48-legacy-component-boundaries`.
+9. Criar validação de clone limpo: build, testes, migrations, Docker Compose, LoginServer, GameServer, login do cliente, criação de personagem e persistência no PostgreSQL — CI automatizada para build e serviços; login de cliente e criação continuam como validação manual.
 
 Critérios de segurança:
 
@@ -151,7 +152,7 @@ scripts oficiais de build/start/deploy
         ↓
 isolamento de site, ferramentas e legado
         ↓
-CI, release reproduzível e validação de clone limpo
+CI, release reproduzível e validação de clone limpo — implementado em `feature/49-reproducible-build-validation`
 ```
 
 A Fase 5 só deve começar quando a Fase 4 e a Fase 4.1 estiverem concluídas ou quando uma exceção for registrada explicitamente no roadmap.
