@@ -178,3 +178,18 @@ Sequência oficial:
 
 Nenhuma etapa deve publicar recursos AWS ou expor o banco sem PR, revisão e
 validação específica.
+
+### Portal de contas
+
+O portal público será desenvolvido em `apps/account-portal/` com React/Vite e
+publicado como frontend estático pelo GitHub Pages. Ele nunca pode conter
+`GameApiSecret`, credenciais JDBC ou acesso direto ao PostgreSQL.
+
+Cadastro, login web, verificação de e-mail e recuperação de senha devem passar
+por uma Account API/BFF server-side. Essa API conversa com a Game API interna
+por HMAC em rede privada e mantém sessões web independentes do protocolo do
+jogo. O fluxo atual de `reset-password` que recebe apenas login e nova senha
+não é uma recuperação pública segura e não deve ser exposto.
+
+O contrato e a arquitetura estão documentados em
+[`docs/architecture/account-portal.md`](docs/architecture/account-portal.md).

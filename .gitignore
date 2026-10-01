@@ -99,3 +99,7 @@ secrets/
 # Local config backup (never commit)
 .local-config-backup/
 
+# React account portal build outputs and local dependencies
+apps/account-portal/node_modules/
+apps/account-portal/dist/
+
