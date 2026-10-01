@@ -86,6 +86,7 @@ Atualizado em 2026-09-30:
 - Após o merge desta etapa, a Fase 4 será considerada concluída. Não iniciar a Fase 5 antes de executar a Fase 4.1, salvo exceção registrada explicitamente.
 - A Fase 4.1 foi adicionada como etapa oficial para depois da Fase 4 e antes da Fase 5. Ela trata a normalização estrutural do repositório, sem reescrever o motor de pacotes ou o núcleo do jogo.
 - Depois da Fase 4.1, permanecem como trabalho estrutural a matriz automatizada PostgreSQL/MariaDB, testes de persistência mais amplos e o endurecimento do deployment para AWS/produção.
+- A Fase 5 foi iniciada após o merge da Fase 4.1. Sua primeira etapa é o contrato de produção, documentado em [`docs/deployment/production-readiness.md`](docs/deployment/production-readiness.md). Ela não cria recursos AWS nem autoriza deploy automático.
 
 - O layout canônico de banco é `database/`; novos migrations, seeds e fixtures
   não devem ser criados em `db/`, `data/`, `deploy/docker` ou `brproject-data`.
@@ -156,3 +157,24 @@ CI, release reproduzível e validação de clone limpo — implementado em `feat
 ```
 
 A Fase 5 só deve começar quando a Fase 4 e a Fase 4.1 estiverem concluídas ou quando uma exceção for registrada explicitamente no roadmap.
+
+### Fase 5 — preparação para produção
+
+Objetivo: levar o servidor a uma operação controlada sem misturar código do
+jogo com infraestrutura irreversível. A primeira etapa define o contrato de
+produção, a topologia AWS, segredos, persistência, observabilidade, rollback,
+capacidade e critérios de aceite.
+
+Sequência oficial:
+
+1. contrato de produção e critérios de aceite — em `feature/51-production-readiness-contract`;
+2. imagens imutáveis, GHCR e SBOM;
+3. configuração de deployment sem segredos;
+4. restore drill de PostgreSQL e migrations;
+5. teste de carga e dimensionamento da EC2;
+6. observabilidade e runbook;
+7. VPC, RDS, Session Manager e mitigação DDoS;
+8. IaC e ambiente AWS de homologação.
+
+Nenhuma etapa deve publicar recursos AWS ou expor o banco sem PR, revisão e
+validação específica.

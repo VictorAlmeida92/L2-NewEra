@@ -40,6 +40,8 @@ docs/*
 !docs/database/*.properties
 !docs/architecture/
 !docs/architecture/*.md
+!docs/deployment/
+!docs/deployment/*.md
 
 # IDE
 .idea/
