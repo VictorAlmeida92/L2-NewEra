@@ -57,6 +57,7 @@ import ext.mods.extensions.listener.manager.GameListenerManager
 import ext.mods.extensions.spi.ClasspathExtensionBootstrap
 import ext.mods.gameserver.communitybbs.CommunityBoard
 import ext.mods.gameapi.GameApiServer
+import ext.mods.gameapi.account.AccountApiServer
 import ext.mods.gameserver.communitybbs.CustomCommunityBoard
 import ext.mods.gameserver.communitybbs.custom.AuctionBBSManager
 import ext.mods.gameserver.custom.data.AuctionCurrencies
@@ -639,6 +640,11 @@ class GameServer : Runnable {
             GameApiServer.startFromGameServer()
         } catch (e: Exception) {
             LOGGER.error("Failed to start internal site API", e)
+        }
+        try {
+            AccountApiServer.startFromGameServer()
+        } catch (e: Exception) {
+            LOGGER.error("Failed to start account API", e)
         }
     }
     override fun run() {}
