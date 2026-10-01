@@ -2,7 +2,7 @@
 set -euo pipefail
 cd /l2Brproject/game
 
-envsubst '${DB_URL} ${DB_USER} ${DB_PASSWORD} ${GAME_SERVER_HOST}' \
+envsubst '${DB_URL} ${DB_USER} ${DB_PASSWORD} ${GAME_SERVER_HOST} ${ACCOUNT_API_ENABLED} ${ACCOUNT_API_HOST} ${ACCOUNT_API_PORT} ${ACCOUNT_API_RATE_LIMIT} ${ACCOUNT_API_SESSION_TTL_MS} ${ACCOUNT_API_ALLOWED_ORIGINS} ${ACCOUNT_API_ALLOW_INSECURE_BIND}' \
   < config/server.properties.template \
   > config/server.properties
 

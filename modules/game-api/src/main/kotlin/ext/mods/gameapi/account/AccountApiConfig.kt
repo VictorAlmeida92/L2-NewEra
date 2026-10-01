@@ -17,6 +17,8 @@ object AccountApiConfig {
         private set
     @Volatile var allowedOrigins: Set<String> = emptySet()
         private set
+    @Volatile var allowInsecureBind: Boolean = false
+        private set
 
     fun load() {
         val props = Properties()
@@ -31,6 +33,7 @@ object AccountApiConfig {
             .map(String::trim)
             .filter(String::isNotEmpty)
             .toSet()
+        allowInsecureBind = props.bool("AccountApiAllowInsecureBind", false)
     }
 
     private fun findServerProperties(): File? = listOf(

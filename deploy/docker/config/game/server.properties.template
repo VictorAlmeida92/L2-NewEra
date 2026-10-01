@@ -23,9 +23,10 @@ DeleteCharsAfterDays = 7
 MaximumOnlineUsers = 2000
 
 # Server-side account API. Disabled by default; expose it only behind a TLS reverse proxy.
-AccountApiEnabled = False
-AccountApiHost = 127.0.0.1
-AccountApiPort = 9090
-AccountApiRateLimit = 20
-AccountApiSessionTtlMs = 86400000
-AccountApiAllowedOrigins =
+AccountApiEnabled = ${ACCOUNT_API_ENABLED}
+AccountApiHost = ${ACCOUNT_API_HOST}
+AccountApiPort = ${ACCOUNT_API_PORT}
+AccountApiRateLimit = ${ACCOUNT_API_RATE_LIMIT}
+AccountApiSessionTtlMs = ${ACCOUNT_API_SESSION_TTL_MS}
+AccountApiAllowedOrigins = ${ACCOUNT_API_ALLOWED_ORIGINS}
+AccountApiAllowInsecureBind = ${ACCOUNT_API_ALLOW_INSECURE_BIND}

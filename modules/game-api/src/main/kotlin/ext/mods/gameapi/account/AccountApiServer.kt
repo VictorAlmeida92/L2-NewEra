@@ -46,8 +46,11 @@ class AccountApiServer private constructor() : AutoCloseable {
             LOGGER.info("[account-api] disabled")
             return
         }
-        require(AccountApiConfig.host in SAFE_HOSTS) {
-            "Refusing unsafe AccountApiHost='${AccountApiConfig.host}'. Use loopback behind a TLS reverse proxy."
+        require(AccountApiConfig.host in SAFE_HOSTS || AccountApiConfig.allowInsecureBind) {
+            "Refusing unsafe AccountApiHost='${AccountApiConfig.host}'. Use loopback behind a TLS reverse proxy, or explicitly enable AccountApiAllowInsecureBind for local development."
+        }
+        if (AccountApiConfig.host !in SAFE_HOSTS) {
+            LOGGER.warn("[account-api] insecure bind enabled for local development: {}", AccountApiConfig.host)
         }
 
         cleaner = Executors.newSingleThreadScheduledExecutor { r ->
