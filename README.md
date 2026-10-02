@@ -524,6 +524,10 @@ padrão. Rotas iniciais: `GET /api/account/health`, `POST /api/account/register`
 `POST /api/account/change-password`. Ela usa sessões opacas, rate limit e bind
 de loopback; não recebe o segredo HMAC no navegador e não expõe JDBC ao portal.
 Detalhes: [`docs/architecture/account-portal.md`](docs/architecture/account-portal.md).
+O frontend estático foi extraído para o repositório
+[`L2-NewEra-Frontend`](https://github.com/VictorAlmeida92/L2-NewEra-Frontend) e
+é publicado em
+[`victoralmeida92.github.io/L2-NewEra-Frontend`](https://victoralmeida92.github.io/L2-NewEra-Frontend/).
 
 ### Cluster HPC & Telemetria Intel PCM (`:cluster-hpc`)
 
@@ -774,7 +778,6 @@ BrProject-2026/
 │   ├── app-dist/                    # Distribuição / montagem do libs/server.jar
 │   └── mods/                        # 19 First-Party Mods desacoplados (mod-*)
 ├── database/                        # Migrations, seeds, fixtures e metadados de banco
-├── apps/account-portal/              # Frontend React público, sem segredos
 ├── brproject-data/                  # Compatibilidade temporária de config-examples
 ├── deploy/                          # Dockerfiles e docker-compose.yml
 ├── game/                            # Raiz de execução do GameServer (data/ e config/)
@@ -785,10 +788,10 @@ BrProject-2026/
 └── settings.gradle.kts              # Declaração dos 14 módulos e 19 mods
 ```
 
-O portal de contas está sendo introduzido separadamente do runtime do jogo.
+O portal de contas é mantido separadamente do runtime do jogo no repositório
+[`L2-NewEra-Frontend`](https://github.com/VictorAlmeida92/L2-NewEra-Frontend).
 Consulte [`docs/architecture/account-portal.md`](docs/architecture/account-portal.md)
-e [`apps/account-portal/README.md`](apps/account-portal/README.md) antes de
-conectar qualquer frontend à API interna.
+antes de conectar qualquer frontend à API interna.
 
 ---
 
