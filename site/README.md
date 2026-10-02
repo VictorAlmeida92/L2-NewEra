@@ -3,7 +3,7 @@
 Esta pasta é um snapshot estático, não um projeto-fonte reproduzível completo.
 Ela contém `index.html`, imagens e alguns fragmentos TSX, mas não possui
 manifesto de dependências, lockfile ou pipeline de build. Também não existe
-referência no servidor que faça `bin/site-native.exe` ler esta pasta; uma
+referência no servidor que faça um executável externo `site-native.exe` ler esta pasta; uma
 relação entre os dois não pode ser assumida apenas pelo conteúdo visual.
 
 Uma implementação de site deve se comunicar com o servidor pelo contrato

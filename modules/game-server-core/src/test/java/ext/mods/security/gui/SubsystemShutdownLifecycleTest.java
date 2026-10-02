@@ -22,6 +22,17 @@ public class SubsystemShutdownLifecycleTest {
     }
 
     @Test
+    public void testOptionalToolsResolveOutsideRepositoryBinDirectory() {
+        java.io.File externalDirectory = new java.io.File("C:/L2-NewEra-tools");
+        java.io.File resolved = ProcessManagerService.resolveOptionalExecutablePath(externalDirectory, "site-native.exe");
+
+        assertEquals(new java.io.File(externalDirectory, "site-native.exe"), resolved);
+        assertFalse(resolved.getPath().contains("L2-NewEra" + java.io.File.separator + "bin" + java.io.File.separator),
+            "Optional GUI tools must be resolved from an external directory");
+        assertNull(ProcessManagerService.resolveOptionalExecutablePath(null, "cloudflared.exe"));
+    }
+
+    @Test
     public void testStopAllServicesForcedExit() {
         ProcessManagerService pms = ProcessManagerService.getInstance();
         assertDoesNotThrow(() -> pms.stopAllServices(true), "stopAllServices forced mode should execute cleanly");
