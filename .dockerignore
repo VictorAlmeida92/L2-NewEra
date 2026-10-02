@@ -15,6 +15,7 @@ libs/modules/
 game/log
 login/log
 logs
+cache
 game/cache
 login/cache
 data/*.sqlite

@@ -235,6 +235,59 @@ tasks.register("checkRuntimeScripts") {
     }
 }
 
+tasks.register("checkLegacyLauncherHelpers") {
+    group = "verification"
+    description = "Validates the boundary between legacy launcher helpers and generated cache state"
+
+    doLast {
+        val helperRoot = rootProject.file("tools/legacy/launcher-helpers")
+        val requiredHelpers = listOf(
+            "brproject-ansi.inc.bat",
+            "brproject-cds-check.inc.bat",
+            "brproject-cds-check.inc.sh",
+            "brproject-classpath.inc.bat",
+            "brproject-classpath.inc.sh",
+            "brproject-g1-reclaim.inc.bat",
+            "brproject-g1-reclaim.inc.sh",
+            "brproject-java.inc.bat",
+            "brproject-java.inc.sh",
+        )
+        val missing = requiredHelpers.filterNot { helperRoot.resolve(it).isFile }
+        if (missing.isNotEmpty())
+            throw GradleException("Missing legacy launcher helpers: $missing")
+
+        val trackedCacheHelpers = rootProject.fileTree("cache") {
+            include("brproject-*.inc.*", ".appcds-fp")
+        }.files
+        if (trackedCacheHelpers.isNotEmpty())
+            throw GradleException("Generated cache still contains tracked launcher helpers: $trackedCacheHelpers")
+
+        val launchers = listOf(
+            "StartBrproject.bat",
+            "StartGame_SemDashboard.bat",
+            "StartGame_SemDashboard.sh",
+            "StartLogin_SemDashboard.bat",
+            "StartLogin_SemDashboard.sh",
+            "StartBrproject.sh",
+            "RegisterGameServer.sh",
+        ).map(rootProject::file)
+        val staleReferences = launchers.flatMap { launcher ->
+            launcher.readLines().mapIndexedNotNull { index, line ->
+                if (line.contains("cache/brproject-") || line.contains("cache\\\\brproject-"))
+                    "${launcher.path}:${index + 1}"
+                else null
+            }
+        }
+        if (staleReferences.isNotEmpty())
+            throw GradleException("Launchers still reference helpers under generated cache: $staleReferences")
+
+        if (!rootProject.file(".gitignore").readLines().any { it.trim() == "cache/" })
+            throw GradleException("Root cache/ must be ignored because it is generated runtime state")
+
+        logger.lifecycle("Legacy launcher helper boundary: clean")
+    }
+}
+
 tasks.register("checkComponentBoundaries") {
     group = "verification"
     description = "Protects the boundary between the official server and optional legacy components"
@@ -299,6 +352,7 @@ tasks.named("build") {
     dependsOn("checkDatabaseConnectionBoundary")
     dependsOn("checkPersistenceConstructionBoundary")
     dependsOn("checkRuntimeScripts")
+    dependsOn("checkLegacyLauncherHelpers")
     dependsOn("checkComponentBoundaries")
 }
 

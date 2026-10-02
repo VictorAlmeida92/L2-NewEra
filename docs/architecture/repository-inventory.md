@@ -50,6 +50,7 @@ flowchart TD
 | ferramentas opcionais do painel | `cloudflared.exe` e `site-native.exe` fornecidos externamente | Integração opcional/legado | Não versionar; configurar `l2newera.optionalToolsDir` ou `L2NEWERA_OPTIONAL_TOOLS_DIR` |
 | `site/` | Snapshot estático sem build reproduzível completo | Componente web legado | Fora do Docker oficial; integração somente pela Game API |
 | `tools/runtime/` e `StartL2NewEra.*` | Interface operacional Docker | Ferramenta oficial | Manter como contrato canônico de build/start/stop/status/logs |
+| `tools/legacy/launcher-helpers/` | Helpers compartilhados pelos launchers diretos | Compatibilidade | Manter enquanto os launchers antigos existirem; não tratar como cache |
 | demais scripts `.bat`, `.sh`, `.ps1`, `.vbs`, `.command` | Inicialização direta por JAR e compatibilidade de ambientes | Wrappers legados | Manter enquanto houver consumidores na GUI, Gradle e classes Java; não usar como runtime oficial |
 
 ## Dependências críticas encontradas
@@ -66,6 +67,8 @@ flowchart TD
 5. `game/data/geodata/` é dado operacional versionado e não deve ser tratado
    como cache descartável. A política de distribuição será definida junto com
    a política de artefatos pesados.
+6. `cache/` na raiz é exclusivamente estado gerado pelo AppCDS. Os helpers
+   versionáveis dos launchers ficam em `tools/legacy/launcher-helpers/`.
 
 ## Política de artefatos proposta
 

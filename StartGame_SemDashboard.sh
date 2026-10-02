@@ -8,12 +8,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
-# shellcheck source=cache/brproject-java.inc.sh
-source "$ROOT/cache/brproject-java.inc.sh"
-# shellcheck source=cache/brproject-g1-reclaim.inc.sh
-source "$ROOT/cache/brproject-g1-reclaim.inc.sh"
-# shellcheck source=cache/brproject-classpath.inc.sh
-source "$ROOT/cache/brproject-classpath.inc.sh" "$ROOT/libs"
+# shellcheck source=tools/legacy/launcher-helpers/brproject-java.inc.sh
+source "$ROOT/tools/legacy/launcher-helpers/brproject-java.inc.sh"
+# shellcheck source=tools/legacy/launcher-helpers/brproject-g1-reclaim.inc.sh
+source "$ROOT/tools/legacy/launcher-helpers/brproject-g1-reclaim.inc.sh"
+# shellcheck source=tools/legacy/launcher-helpers/brproject-classpath.inc.sh
+source "$ROOT/tools/legacy/launcher-helpers/brproject-classpath.inc.sh" "$ROOT/libs"
 
 XMS="${BRPROJECT_GAME_XMS:-2g}"
 XMX="${BRPROJECT_GAME_XMX:-2g}"
@@ -39,8 +39,8 @@ cd "$ROOT/game"
 
 # AppCDS check (só se usar snapshot no game/cache)
 if [[ "${JAVA_MAJOR:-0}" -ge 25 ]]; then
-  # shellcheck source=cache/brproject-cds-check.inc.sh
-  source "$ROOT/cache/brproject-cds-check.inc.sh" "cache/brproject_cds.jsa" "$ROOT/libs/server.jar" "G1"
+  # shellcheck source=tools/legacy/launcher-helpers/brproject-cds-check.inc.sh
+  source "$ROOT/tools/legacy/launcher-helpers/brproject-cds-check.inc.sh" "cache/brproject_cds.jsa" "$ROOT/libs/server.jar" "G1"
 fi
 
 echo "=== Lineage2 NewEra GameServer ==="

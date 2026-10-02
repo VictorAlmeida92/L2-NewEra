@@ -19,18 +19,18 @@ call :ensure_first_run_prepared
 if errorlevel 1 goto fail
 
 REM --- Habilita cores ANSI no console (cmd.exe) antes do Java imprimir o banner ---
-call "%~dp0cache\brproject-ansi.inc.bat"
+call "%~dp0tools\legacy\launcher-helpers\brproject-ansi.inc.bat"
 
-call "%~dp0cache\brproject-java.inc.bat"
-call "%~dp0cache\brproject-g1-reclaim.inc.bat"
+call "%~dp0tools\legacy\launcher-helpers\brproject-java.inc.bat"
+call "%~dp0tools\legacy\launcher-helpers\brproject-g1-reclaim.inc.bat"
 set JVM_FLAGS=-Xms256m -Xmx256m -Dext.mods.Config.dataPath=../game/data -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:G1HeapRegionSize=8m -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+UseCompactObjectHeaders -XX:+TieredCompilation -XX:TieredStopAtLevel=4 %G1_RECLAIM_FLAGS% -XX:+AutoCreateSharedArchive -XX:SharedArchiveFile=cache/brproject_cds.jsa -Xlog:cds=error
 
 cd /d "%~dp0login"
 
 if not exist cache mkdir cache
 
-call "%~dp0cache\brproject-cds-check.inc.bat" "cache\brproject_cds.jsa" "%~dp0libs\server.jar" "G1"
-call "%~dp0cache\brproject-classpath.inc.bat" "%~dp0libs"
+call "%~dp0tools\legacy\launcher-helpers\brproject-cds-check.inc.bat" "cache\brproject_cds.jsa" "%~dp0libs\server.jar" "G1"
+call "%~dp0tools\legacy\launcher-helpers\brproject-classpath.inc.bat" "%~dp0libs"
 
 REM --- Redireciona stdout+stderr para o log do servidor (janela oculta, logs preservados) ---
 "%JAVA_CMD%" %JVM_FLAGS% -cp "%BRPROJECT_CP%" ext.mods.loginserver.LoginServer >> "%~dp0logs\login-server.log" 2>&1

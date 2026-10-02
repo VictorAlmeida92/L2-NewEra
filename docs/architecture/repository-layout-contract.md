@@ -11,6 +11,7 @@ até que seus consumidores sejam migrados e testados.
 | `database/` | migrations, seeds e fixtures | única raiz canônica de banco |
 | `deploy/` | Docker Compose e Dockerfiles oficiais | deployment reproduzível |
 | `tools/runtime/` | comandos oficiais de operação | novos comandos entram aqui |
+| `tools/legacy/launcher-helpers/` | helpers dos launchers diretos legados | manter somente para compatibilidade; não usar como cache ou runtime oficial |
 | `docs/` | documentação mantida | não misturar logs ou artefatos |
 | `L2-NewEra-Frontend` (repositório separado) | frontend React público | build independente, Pages e sem segredos |
 | `site/` | snapshot web legado | não tratar como fonte reproduzível |

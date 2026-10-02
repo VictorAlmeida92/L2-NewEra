@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Classpath absoluto e ordenado (macOS/Linux usa ':').
-# Uso: source cache/brproject-classpath.inc.sh [DIR_LIBS]
+# Uso: source tools/legacy/launcher-helpers/brproject-classpath.inc.sh [DIR_LIBS]
 # Exporta: BRPROJECT_CP
 
 _LIBS="${1:-}"
