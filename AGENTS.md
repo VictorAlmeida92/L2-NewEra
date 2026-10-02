@@ -140,7 +140,7 @@ Atualizado em 2026-09-30:
 - A Fase 5 foi iniciada após o merge da Fase 4.1. Sua primeira etapa é o contrato de produção, documentado em [`docs/deployment/production-readiness.md`](docs/deployment/production-readiness.md). Ela não cria recursos AWS nem autoriza deploy automático.
 
 - O layout canônico de banco é `database/`; novos migrations, seeds e fixtures
-  não devem ser criados em `db/`, `data/`, `deploy/docker` ou `brproject-data`.
+  não devem ser criados em `db/`, `data/` ou `deploy/docker`.
 
 O primeiro bloco da Fase 4.1 foi iniciado na branch `feature/44-structural-normalization`.
 O inventário e as dependências críticas estão documentados em
@@ -151,8 +151,8 @@ individual, mas a remoção do JAR gerado já possui validação reproduzível e
 
 O bloco de banco da Fase 4.1 consolidou o layout canônico em `database/`.
 O Compose, o runner Flyway e os testes devem consumir essa raiz; `tools/sql/`
-permanece apenas como fonte legada do gerador, e `brproject-data/` mantém
-temporariamente exemplos de configuração.
+permanece apenas como fonte legada do gerador, e `config/examples/` é a origem
+canônica dos templates de configuração.
 
 O runtime local oficial é operado por `tools/runtime/l2newera.ps1` e
 `tools/runtime/l2newera.sh`, com wrappers compatíveis `StartL2NewEra.*` na

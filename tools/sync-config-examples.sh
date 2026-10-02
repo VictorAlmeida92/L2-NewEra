@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Sync brproject-data config examples into runtime tree (never overwrites live secrets).
+# Sync canonical config examples into the runtime tree (never overwrites live secrets).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DATA="${ROOT}/brproject-data"
+DATA="${ROOT}/config/examples"
 DATABASE="${ROOT}/database"
 GAME_CFG="${ROOT}/game/config"
 LOGIN_CFG="${ROOT}/login/config"
@@ -20,15 +20,15 @@ copy_example() {
   fi
 }
 
-echo "Syncing config examples..."
-if [[ -d "${DATA}/config-examples/game" ]]; then
-  for f in "${DATA}/config-examples/game"/*; do
+echo "Syncing config examples from config/examples..."
+if [[ -d "${DATA}/game" ]]; then
+  for f in "${DATA}/game"/*; do
     [[ -f "$f" ]] || continue
     copy_example "$f" "${GAME_CFG}/$(basename "$f")"
   done
 fi
-if [[ -d "${DATA}/config-examples/login" ]]; then
-  for f in "${DATA}/config-examples/login"/*; do
+if [[ -d "${DATA}/login" ]]; then
+  for f in "${DATA}/login"/*; do
     [[ -f "$f" ]] || continue
     copy_example "$f" "${LOGIN_CFG}/$(basename "$f")"
   done

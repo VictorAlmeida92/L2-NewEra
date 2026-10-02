@@ -31,7 +31,7 @@ flowchart LR
 | Diretório externo de ferramentas | `site-native.exe` e `cloudflared.exe`, quando configurados | `ProcessManagerService` do painel Swing | Não |
 | `libs/` | 125,53 MB de dependências vendorizadas e checksums | Gradle, fat JAR, launchers diretos e extensões | Sim, parcialmente |
 | `tools/` | runtime oficial, SQL legado, rede e scripts one-shot | Desenvolvimento/administração | Somente `tools/runtime/` |
-| `brproject-data/` | exemplos de configuração remanescentes | scripts/painel de preparação legados | Não no Compose |
+| `config/examples/` | templates seguros de configuração | script de sincronização local | Não no Compose |
 
 ## Decisões
 
