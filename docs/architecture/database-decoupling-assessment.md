@@ -29,7 +29,7 @@ Arquivos existentes:
 - `deploy/docker/Dockerfile.jlink`;
 - scripts `run-game.sh` e `run-login.sh`;
 - `deploy/docker/README.md`;
-- `brproject-data/config-examples/*docker.example`.
+- `config/examples/*docker.example`.
 
 ### Inconsistências encontradas
 

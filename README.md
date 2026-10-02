@@ -778,7 +778,7 @@ BrProject-2026/
 │   ├── app-dist/                    # Distribuição / montagem do libs/server.jar
 │   └── mods/                        # 19 First-Party Mods desacoplados (mod-*)
 ├── database/                        # Migrations, seeds, fixtures e metadados de banco
-├── brproject-data/                  # Compatibilidade temporária de config-examples
+├── config/                          # Credenciais locais e templates de configuração
 ├── deploy/                          # Dockerfiles e docker-compose.yml
 ├── game/                            # Raiz de execução do GameServer (data/ e config/)
 ├── login/                           # Raiz de execução do LoginServer (config/)

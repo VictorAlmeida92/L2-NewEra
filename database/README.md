@@ -51,7 +51,7 @@ inventários ou credenciais reais não devem ser adicionados aqui.
 
 - `tools/sql/` continua temporariamente como fonte do gerador de baseline e do
   preparador legado.
-- `brproject-data/config-examples/` permanece até a fase de consolidação de
-  configuração.
+- `config/examples/` é a raiz canônica dos templates de configuração; o script
+  `tools/sync-config-examples.sh` os copia para o runtime quando necessário.
 - Dumps locais devem ser informados explicitamente a
   `tools/sql/mysql_to_sqlite.py --input <arquivo>`.
