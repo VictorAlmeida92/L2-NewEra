@@ -103,3 +103,6 @@ apps/*/dist/
 # Local config backup (never commit)
 .local-config-backup/
 
+# Client patch assets belong to the separate client repository.
+/Hwid/
+

@@ -243,7 +243,6 @@ tasks.register("checkComponentBoundaries") {
         val boundaryDocs = listOf(
             "docs/architecture/component-boundaries.md",
             "bin/README.md",
-            "Hwid/README.md",
             "site/README.md",
             "libs/README.md",
             "tools/README.md",
@@ -253,12 +252,12 @@ tasks.register("checkComponentBoundaries") {
             throw GradleException("Missing component boundary documentation: $missingDocs")
 
         val dockerIgnore = rootProject.file(".dockerignore").readLines().map { it.trim() }.toSet()
-        val missingDockerExcludes = listOf("bin", "Hwid", "site").filterNot(dockerIgnore::contains)
+        val missingDockerExcludes = listOf("bin", "site").filterNot(dockerIgnore::contains)
         if (missingDockerExcludes.isNotEmpty())
             throw GradleException("Optional components leaked into the official Docker context: $missingDockerExcludes")
 
         val compose = rootProject.file("deploy/docker/docker-compose.yml").readText()
-        val forbiddenComposeReferences = listOf("bin/", "Hwid/", "../site", "../../site")
+        val forbiddenComposeReferences = listOf("bin/", "../site", "../../site")
             .filter(compose::contains)
         if (forbiddenComposeReferences.isNotEmpty())
             throw GradleException("Official Compose references optional legacy components: $forbiddenComposeReferences")
@@ -277,11 +276,10 @@ tasks.register("checkComponentBoundaries") {
         }.flatMap { file ->
             file.readLines().mapIndexedNotNull { index, line ->
                 val filesystemMarkers = listOf(
-                    "new File(\"Hwid/", "new File(\"Hwid\\\\",
                     "new File(\"site/", "new File(\"site\\\\",
-                    "Path.of(\"Hwid/", "Path.of(\"site/",
-                    "Paths.get(\"Hwid/", "Paths.get(\"site/",
-                    "resolve(\"Hwid/", "resolve(\"site/",
+                    "Path.of(\"site/",
+                    "Paths.get(\"site/",
+                    "resolve(\"site/",
                 )
                 if (filesystemMarkers.any(line::contains))
                     "${file.path}:${index + 1}"
