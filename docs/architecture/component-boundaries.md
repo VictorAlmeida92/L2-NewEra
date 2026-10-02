@@ -30,7 +30,7 @@ flowchart LR
 | `site/` | 128,07 MB; 14.501 arquivos preexistentes, quase todos imagens, além de HTML/TSX | Nenhum consumidor de filesystem comprovado | Não |
 | Diretório externo de ferramentas | `site-native.exe` e `cloudflared.exe`, quando configurados | `ProcessManagerService` do painel Swing | Não |
 | `libs/` | 125,53 MB de dependências vendorizadas e checksums | Gradle, fat JAR, launchers diretos e extensões | Sim, parcialmente |
-| `tools/` | runtime oficial, SQL legado, rede e scripts one-shot | Desenvolvimento/administração | Somente `tools/runtime/` |
+| `tools/` | runtime oficial, helpers de launchers legados, SQL legado, rede e scripts one-shot | Desenvolvimento/administração | `tools/runtime/` é a interface oficial; helpers legados ficam isolados em `tools/legacy/launcher-helpers/` |
 | `config/examples/` | templates seguros de configuração | script de sincronização local | Não no Compose |
 
 ## Decisões

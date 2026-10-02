@@ -31,10 +31,10 @@ title Lineage2 NewEra - License Init
 color 0B
 
 REM --- Habilita cores ANSI no console (cmd.exe) antes de tudo ---
-call "%~dp0cache\brproject-ansi.inc.bat"
+call "%~dp0tools\legacy\launcher-helpers\brproject-ansi.inc.bat"
 
 REM --- Localiza dinamicamente o Java (sem caminhos hardcoded) ---
-call "%~dp0cache\brproject-java.inc.bat"
+call "%~dp0tools\legacy\launcher-helpers\brproject-java.inc.bat"
 
 REM --- Verifica presenca de server.jar antes de iniciar (padrao Projeto Start) ---
 if not exist "%~dp0libs\server.jar" (
@@ -49,8 +49,8 @@ if not exist "%~dp0libs\server.jar" (
 )
 
 REM --- Classpath deterministico e ordenado para AppCDS (sem wildcard libs/*) ---
-if exist "%~dp0cache\brproject-classpath.inc.bat" (
-    call "%~dp0cache\brproject-classpath.inc.bat" "%~dp0libs"
+if exist "%~dp0tools\legacy\launcher-helpers\brproject-classpath.inc.bat" (
+    call "%~dp0tools\legacy\launcher-helpers\brproject-classpath.inc.bat" "%~dp0libs"
 ) else (
     set "BRPROJECT_CP=%~dp0libs\*"
 )
@@ -62,14 +62,14 @@ REM O snapshot brproject_cds.jsa eh criado uma vez e reusado em todas as
 REM inicializacoes subsequentes. Com BRPROJECT_CP estrito (sem wildcard libs/*),
 REM a JVM mapeia o snapshot via mmap sem erro de "shared class paths mismatch".
 REM ============================================================================
-if exist "%~dp0cache\brproject-cds-check.inc.bat" (
-    call "%~dp0cache\brproject-cds-check.inc.bat" "%~dp0cache\brproject_cds.jsa" "%~dp0libs\server.jar" "G1"
+if exist "%~dp0tools\legacy\launcher-helpers\brproject-cds-check.inc.bat" (
+    call "%~dp0tools\legacy\launcher-helpers\brproject-cds-check.inc.bat" "%~dp0cache\brproject_cds.jsa" "%~dp0libs\server.jar" "G1"
 ) else (
     echo [AVISO] brproject-cds-check.inc.bat nao encontrado - AppCDS desabilitado.
 )
 
 REM --- Flags de GC Reclaim e Compact Object Headers para Java 25 ---
-call "%~dp0cache\brproject-g1-reclaim.inc.bat" 2>nul
+call "%~dp0tools\legacy\launcher-helpers\brproject-g1-reclaim.inc.bat" 2>nul
 set "JVM_EXTRA_FLAGS=-XX:+UseCompactObjectHeaders -XX:+UseStringDeduplication"
 if defined G1_RECLAIM_FLAGS set "JVM_EXTRA_FLAGS=%JVM_EXTRA_FLAGS% %G1_RECLAIM_FLAGS%"
 

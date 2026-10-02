@@ -1,6 +1,6 @@
 @echo off
 REM Invalida AppCDS: server.jar atualizado ou modo GC alterado (G1 vs ZGC).
-REM Uso: call "%~dp0cache\brproject-cds-check.inc.bat" "cache\brproject_cds.jsa" "..\libs\server.jar" "G1"
+REM Uso (a partir da raiz): call "tools\legacy\launcher-helpers\brproject-cds-check.inc.bat" "cache\brproject_cds.jsa" "libs\server.jar" "G1"
 setlocal EnableDelayedExpansion
 set "CDS=%~1"
 set "JAR=%~2"

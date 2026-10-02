@@ -160,6 +160,9 @@ raiz. Novos comandos operacionais devem ser adicionados nessa interface, não em
 novos scripts soltos. Os launchers `StartLogin_SemDashboard.*`,
 `StartGame_SemDashboard.*` e `StartBrproject.*` são compatibilidade legada por
 JAR/GUI até seus consumidores serem isolados.
+Os helpers compartilhados desses launchers ficam em
+`tools/legacy/launcher-helpers/`; a pasta raiz `cache/` contém somente estado
+gerado do AppCDS, é ignorada pelo Git e pode ser recriada em cada máquina.
 
 As fronteiras de componentes opcionais estão documentadas em
 [`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md).

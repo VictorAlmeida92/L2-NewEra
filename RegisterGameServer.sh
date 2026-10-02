@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
-# shellcheck source=cache/brproject-java.inc.sh
-source "$ROOT/cache/brproject-java.inc.sh"
-# shellcheck source=cache/brproject-classpath.inc.sh
-source "$ROOT/cache/brproject-classpath.inc.sh" "$ROOT/libs"
+# shellcheck source=tools/legacy/launcher-helpers/brproject-java.inc.sh
+source "$ROOT/tools/legacy/launcher-helpers/brproject-java.inc.sh"
+# shellcheck source=tools/legacy/launcher-helpers/brproject-classpath.inc.sh
+source "$ROOT/tools/legacy/launcher-helpers/brproject-classpath.inc.sh" "$ROOT/libs"
 
 CFG="$ROOT/login/config/console.cfg"
 if [[ ! -f "$CFG" ]]; then

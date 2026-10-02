@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Invalida AppCDS se server.jar for mais novo ou o modo GC mudou.
-# Uso: source cache/brproject-cds-check.inc.sh CDS_PATH SERVER_JAR [G1|ZGC]
+# Uso: source tools/legacy/launcher-helpers/brproject-cds-check.inc.sh CDS_PATH SERVER_JAR [G1|ZGC]
 
 _CDS="${1:-}"
 _JAR="${2:-}"

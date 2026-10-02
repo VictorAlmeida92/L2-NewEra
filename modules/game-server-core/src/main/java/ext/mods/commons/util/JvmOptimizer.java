@@ -186,7 +186,7 @@ public final class JvmOptimizer
 				LOGGER.warn("        -> A JVM criara o snapshot automaticamente ao encerrar o servidor.");
 				LOGGER.warn("        -> O proximo boot ja sera mais rapido.");
 				LOGGER.warn("        -> No shutdown, avisos [cds] sobre JFR/proxy sao normais (classes nao arquivaveis).");
-				LOGGER.warn("        -> Use classpath fixo (cache/brproject-classpath.inc.bat); evite libs/* no Windows.");
+				LOGGER.warn("        -> Use classpath fixo (tools/legacy/launcher-helpers/brproject-classpath.inc.bat); evite libs/* no Windows.");
 			}
 		}
 		else

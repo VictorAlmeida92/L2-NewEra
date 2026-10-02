@@ -1,6 +1,6 @@
 @echo off
 REM Classpath absoluto e ordenado para AppCDS (evita "shared class paths mismatch").
-REM Uso: call "%~dp0cache\brproject-classpath.inc.bat" "%~dp0libs"
+REM Uso (a partir da raiz): call "tools\legacy\launcher-helpers\brproject-classpath.inc.bat" "libs"
 setlocal EnableDelayedExpansion
 set "LIBS=%~f1"
 if "%LIBS%"=="" set "LIBS=%~dp0..\libs"

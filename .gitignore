@@ -83,6 +83,8 @@ flag/PrepararTeste.done
 logs/
 thread-dump.txt
 **/nullgeo_bugs.txt
+# AppCDS and launcher runtime state (the helper scripts live under tools/)
+cache/
 
 # Geodata / heavy runtime
 game/data/prevention/
