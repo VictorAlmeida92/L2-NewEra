@@ -163,10 +163,11 @@ JAR/GUI até seus consumidores serem isolados.
 
 As fronteiras de componentes opcionais estão documentadas em
 [`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md).
-`bin/` e `site/` não pertencem ao runtime Docker oficial. O site deve integrar-se
-pela `game-api`, nunca por JDBC direto; binários opacos exigem checksum e revisão
-explícita; material de client patch pertence ao repositório do cliente, nunca ao
-código do servidor. `checkComponentBoundaries` protege essas regras.
+`site/` e ferramentas opcionais do painel não pertencem ao runtime Docker oficial.
+O site deve integrar-se pela `game-api`, nunca por JDBC direto; executáveis
+opacos devem ser fornecidos externamente com procedência e revisão explícitas;
+material de client patch pertence ao repositório do cliente, nunca ao código do
+servidor. `checkComponentBoundaries` protege essas regras.
 
 ### Fase 4.1 — normalização estrutural do projeto
 
@@ -179,7 +180,7 @@ Escopo oficial:
 3. Definir a publicação de artefatos por GitHub Actions, GitHub Releases e/ou registro de imagens Docker, sem usar o Git como armazenamento de binários gerados.
 4. Consolidar migrations, seeds, fixtures e documentação de banco em uma estrutura única, mantendo compatibilidade temporária com os caminhos legados.
 5. Definir um fluxo oficial de inicialização local e de validação, reduzindo a duplicação entre scripts `.bat`, `.sh`, `.ps1`, `.vbs` e `.command`.
-6. Isolar e documentar `bin`, `site`, `libs` e demais componentes legados; o material do client patch foi extraído/removido do servidor — concluído em `feature/48-legacy-component-boundaries` e nesta etapa.
+6. Isolar e documentar `site`, `libs`, ferramentas opcionais e demais componentes legados; o material do client patch foi extraído/removido e os binários opcionais foram externalizados — concluído em `feature/48-legacy-component-boundaries` e nesta etapa.
 7. Separar documentação mantida manualmente de documentação gerada, logs, caches e estado de runtime.
 8. Registrar os limites entre o servidor, o site e ferramentas administrativas, preparando eventual extração para repositórios independentes sem fazê-la prematuramente — concluído em `feature/48-legacy-component-boundaries`.
 9. Criar validação de clone limpo: build, testes, migrations, Docker Compose, LoginServer, GameServer, login do cliente, criação de personagem e persistência no PostgreSQL — CI automatizada para build e serviços; login de cliente e criação continuam como validação manual.

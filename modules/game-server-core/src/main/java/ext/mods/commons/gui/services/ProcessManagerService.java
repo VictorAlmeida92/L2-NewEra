@@ -231,25 +231,60 @@ public class ProcessManagerService {
         return null;
     }
 
+    private static final String OPTIONAL_TOOLS_DIR_PROPERTY = "l2newera.optionalToolsDir";
+    private static final String OPTIONAL_TOOLS_DIR_ENV = "L2NEWERA_OPTIONAL_TOOLS_DIR";
+
+    /**
+     * Resolve an optional GUI executable outside the server repository. The
+     * official Docker runtime never calls this path; it exists only for the
+     * legacy Swing launcher.
+     */
+    private File findOptionalExecutable(File projectRoot, String executableName, List<File> externalCandidates) {
+        List<File> candidates = new ArrayList<>();
+        String configuredDirectory = System.getProperty(OPTIONAL_TOOLS_DIR_PROPERTY);
+        if (configuredDirectory == null || configuredDirectory.isBlank()) {
+            configuredDirectory = System.getenv(OPTIONAL_TOOLS_DIR_ENV);
+        }
+        if (configuredDirectory == null || configuredDirectory.isBlank()) {
+            configuredDirectory = sitePrefs.get("OPTIONAL_TOOLS_DIR", "").trim();
+        }
+        if (configuredDirectory != null && !configuredDirectory.isBlank()) {
+            candidates.add(resolveOptionalExecutablePath(new File(configuredDirectory.trim()), executableName));
+        }
+
+        candidates.add(new File(projectRoot, "data/" + executableName));
+        candidates.add(new File(projectRoot, executableName));
+        candidates.addAll(externalCandidates);
+
+        for (File candidate : candidates) {
+            if (candidate.exists() && candidate.isFile()) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a tool supplied by the operator either as a direct executable
+     * path or as a directory containing the expected executable.
+     */
+    public static File resolveOptionalExecutablePath(File configuredPath, String executableName) {
+        if (configuredPath == null || executableName == null || executableName.isBlank()) {
+            return null;
+        }
+        return configuredPath.isFile() ? configuredPath : new File(configuredPath, executableName);
+    }
+
     private File findSiteNativeExecutable(File projectRoot) {
         String exeExt = isWindows() ? ".exe" : "";
-        File[] candidates = new File[] {
-            new File(projectRoot, "bin/site-native" + exeExt),
-            new File(projectRoot, "bin/brproject-site" + exeExt),
+        return findOptionalExecutable(projectRoot, "site-native" + exeExt, List.of(
             new File("D:/Site_ktor/dist/site-native" + exeExt),
             new File("D:/Site_ktor/bin/site-native" + exeExt),
             new File("D:/Site_ktor/build/native/nativeOptimizedCompile/site-release" + exeExt),
             new File("D:/Site_ktor/build/native/nativeCompile/site-release" + exeExt),
             new File(projectRoot, "modules/site/build/native/nativeOptimizedCompile/site-release" + exeExt),
-            new File(projectRoot, "modules/site/build/native/nativeCompile/site" + exeExt),
-            new File("bin/site-native" + exeExt)
-        };
-        for (File f : candidates) {
-            if (f.exists() && f.isFile()) {
-                return f;
-            }
-        }
-        return null;
+            new File(projectRoot, "modules/site/build/native/nativeCompile/site" + exeExt)
+        ));
     }
 
     public boolean isSiteRunning() {
@@ -272,7 +307,8 @@ public class ProcessManagerService {
         } else {
             JOptionPane.showMessageDialog(frame,
                 "Executável nativo do Site Ktor não encontrado.\n\n" +
-                "Verifique se o arquivo 'site-native.exe' está presente em 'bin/' ou em 'D:/Site_ktor'.\n" +
+                "Configure 'l2newera.optionalToolsDir' ou 'L2NEWERA_OPTIONAL_TOOLS_DIR' " +
+                "com o diretório externo dos executáveis.\n" +
                 "Para compilar o binário nativo, use o repositório D:/Site_ktor.",
                 "Binário Nativo não Encontrado", JOptionPane.WARNING_MESSAGE);
             return false;
@@ -895,19 +931,11 @@ public class ProcessManagerService {
 
     private File findBrprojectdExecutable(File projectRoot) {
         String exeExt = isWindows() ? ".exe" : "";
-        File[] candidates = new File[] {
-            new File(projectRoot, "bin/cloudflared" + exeExt),
-            new File(projectRoot, "bin/Brprojectd" + exeExt),
-            new File(projectRoot, "data/cloudflared" + exeExt),
-            new File(projectRoot, "cloudflared" + exeExt),
-            new File("bin/cloudflared" + exeExt)
-        };
-        for (File f : candidates) {
-            if (f.exists() && f.isFile()) {
-                return f;
-            }
-        }
-        return null;
+        return findOptionalExecutable(projectRoot, "cloudflared" + exeExt, List.of(
+            new File("D:/Site_ktor/data/cloudflared" + exeExt),
+            new File("D:/Site_ktor/cloudflared" + exeExt),
+            new File("D:/Site_ktor/bin/cloudflared" + exeExt)
+        ));
     }
 
     public static final java.util.regex.Pattern CLOUDFLARE_URL_PATTERN =
@@ -956,7 +984,7 @@ public class ProcessManagerService {
     public void startBrprojectTunnel(File projectRoot, String sitePort) {
         File exe = findBrprojectdExecutable(projectRoot);
         if (exe == null) {
-            System.out.println("[CLOUDFLARE] Executável cloudflared.exe não encontrado em bin/. Túnel automático ignorado.");
+            System.out.println("[CLOUDFLARE] Executável cloudflared.exe não encontrado no diretório externo configurado. Túnel automático ignorado.");
             return;
         }
 

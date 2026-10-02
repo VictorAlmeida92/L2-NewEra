@@ -47,7 +47,7 @@ flowchart TD
 | `libs/server.jar` | Fat JAR produzido por `:app-dist:jar` | Artefato gerado | Remover do Git em etapa própria após adaptar Docker/scripts |
 | `libs/*.jar` exceto `server.jar` | Bibliotecas vendorizadas e integrações sem artefato Maven equivalente | Dependência vendorizada | Não remover automaticamente; catalogar origem/licença e migrar gradualmente |
 | `data/`, `db/`, `logs/`, caches e WAL/SHM | Bancos locais, logs e estado de execução | Runtime | Não versionar; preservar somente migrations, seeds e fixtures necessárias |
-| `bin/` | `cloudflared.exe` e `site-native.exe` | Ferramenta opcional/legado | Manter temporariamente para a GUI; checksums protegidos e fora do Docker oficial |
+| ferramentas opcionais do painel | `cloudflared.exe` e `site-native.exe` fornecidos externamente | Integração opcional/legado | Não versionar; configurar `l2newera.optionalToolsDir` ou `L2NEWERA_OPTIONAL_TOOLS_DIR` |
 | `site/` | Snapshot estático sem build reproduzível completo | Componente web legado | Fora do Docker oficial; integração somente pela Game API |
 | `tools/runtime/` e `StartL2NewEra.*` | Interface operacional Docker | Ferramenta oficial | Manter como contrato canônico de build/start/stop/status/logs |
 | demais scripts `.bat`, `.sh`, `.ps1`, `.vbs`, `.command` | Inicialização direta por JAR e compatibilidade de ambientes | Wrappers legados | Manter enquanto houver consumidores na GUI, Gradle e classes Java; não usar como runtime oficial |
@@ -103,7 +103,7 @@ O contrato reproduzível para remover `libs/server.jar` do índice é:
   Compose.
 - Ignorar toda a pasta `game/data` perderia geodata e configurações necessárias
   ao jogo; a separação precisa ser feita por responsabilidade.
-- Mover `site/` ou `bin/` sem busca de referências pode quebrar scripts
-  administrativos e o fluxo local.
+- Remover ferramentas externas sem documentar a configuração pode quebrar o
+  painel Swing legado; o runtime oficial não depende delas.
 - Tratar bibliotecas vendorizadas como lixo pode remover integrações que não são
   substituíveis imediatamente por dependências Maven.

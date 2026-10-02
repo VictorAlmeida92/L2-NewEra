@@ -9,7 +9,6 @@ build
 .vscode
 *.log
 # Optional/legacy components are not part of the official game stack images.
-bin
 site
 libs/server.jar
 libs/modules/

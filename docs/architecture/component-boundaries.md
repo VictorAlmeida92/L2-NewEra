@@ -13,26 +13,22 @@ flowchart LR
     API[game-api\nHTTP interno + HMAC]
     DB[(PostgreSQL)]
     Static[site/\nsnapshot estático]
-    SiteBin[bin/site-native.exe\nsite legado Windows]
-    Tunnel[bin/cloudflared.exe\ntúnel opcional]
+    ExternalTools[Executáveis opcionais\ndiretório externo]
     GUI[Painel Swing legado]
 
     Client --> Game
     Game --> DB
-    Static -. relação não comprovada .-> SiteBin
-    SiteBin --> API
+    ExternalTools --> API
     API --> Game
-    GUI -. inicia opcionalmente .-> SiteBin
-    GUI -. inicia opcionalmente .-> Tunnel
-    Tunnel -. publica HTTP .-> SiteBin
+    GUI -. inicia opcionalmente .-> ExternalTools
 ```
 
 ## Classificação comprovada
 
 | Componente | Conteúdo observado | Consumidor comprovado | Runtime oficial |
 |---|---|---|---|
-| `bin/` | 145,55 MB em dois executáveis Windows | `ProcessManagerService` do painel Swing | Não |
 | `site/` | 128,07 MB; 14.501 arquivos preexistentes, quase todos imagens, além de HTML/TSX | Nenhum consumidor de filesystem comprovado | Não |
+| Diretório externo de ferramentas | `site-native.exe` e `cloudflared.exe`, quando configurados | `ProcessManagerService` do painel Swing | Não |
 | `libs/` | 125,53 MB de dependências vendorizadas e checksums | Gradle, fat JAR, launchers diretos e extensões | Sim, parcialmente |
 | `tools/` | runtime oficial, SQL legado, rede e scripts one-shot | Desenvolvimento/administração | Somente `tools/runtime/` |
 | `brproject-data/` | exemplos de configuração remanescentes | scripts/painel de preparação legados | Não no Compose |
@@ -51,11 +47,13 @@ capaz de reproduzir `site-native.exe`, nem evidência de que o executável leia 
 snapshot `site/`. A futura inclusão exige código-fonte, testes do contrato HTTP,
 imagem própria, healthcheck e configuração explícita.
 
-### Binários Windows
+### Ferramentas opcionais do painel
 
-Os binários permanecem no caminho atual para não quebrar o painel Swing. Eles
-são opcionais e excluídos do contexto Docker. Seus checksums são protegidos por
-teste, mas isso não substitui assinatura, SBOM ou revisão de licença.
+`site-native.exe` e `cloudflared.exe` não pertencem ao repositório do servidor.
+Quando o painel Swing legado for usado, os executáveis podem ser fornecidos por
+um diretório externo configurado com `-Dl2newera.optionalToolsDir`, pela variável
+`L2NEWERA_OPTIONAL_TOOLS_DIR` ou pela preferência local `OPTIONAL_TOOLS_DIR`.
+O Docker oficial não inicia nem distribui essas ferramentas.
 
 ### Client patch e HWID
 
@@ -72,12 +70,13 @@ consumidor tiver uma dependência Gradle ou artefato publicado equivalente.
 ## Regras de dependência
 
 1. Docker oficial pode consumir fonte, `game/`, `login/`, `database/`,
-   `deploy/` e dependências de `libs/`, mas não `bin/` ou `site/`.
+   `deploy/` e dependências de `libs/`, mas não ferramentas externas ou `site/`.
 2. O núcleo do servidor não pode passar a ler arquivos de `site/` nem material
    do client patch.
 3. Integrações web passam por `modules/game-api`; acesso direto do site ao JDBC
    não é um contrato suportado.
 4. Novos scripts operacionais entram em `tools/runtime/`.
-5. Alterar binários opacos exige checksum, procedência e revisão explícita.
+5. Alterar ferramentas externas exige procedência, assinatura e revisão explícita;
+   elas não devem voltar a ser versionadas na raiz do servidor.
 
 Essas regras são verificadas por `checkComponentBoundaries` no build Gradle.

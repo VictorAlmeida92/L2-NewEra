@@ -14,7 +14,7 @@ até que seus consumidores sejam migrados e testados.
 | `docs/` | documentação mantida | não misturar logs ou artefatos |
 | `L2-NewEra-Frontend` (repositório separado) | frontend React público | build independente, Pages e sem segredos |
 | `site/` | snapshot web legado | não tratar como fonte reproduzível |
-| `bin/` | componente legado/opcional | manter isolado até substituição ou extração |
+| ferramentas opcionais do painel | executáveis externos como `site-native.exe` e `cloudflared.exe` | manter fora do repositório e configurar por diretório externo |
 | repositório do client patch | material de distribuição do cliente | separado do servidor |
 | `build/`, `.gradle/`, `.kotlin/`, `cache/`, `logs/` | estado gerado/runtime | ignorado e nunca versionado |
 
