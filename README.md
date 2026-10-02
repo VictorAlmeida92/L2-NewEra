@@ -686,7 +686,7 @@ JAR/GUI e não representam o runtime oficial.
 O site estático, os executáveis Windows opcionais e o material do client patch
 possuem fronteiras próprias e não entram nas imagens do servidor. Consulte
 [`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md)
-antes de alterar `site/`, `bin/`, `Hwid/` ou `libs/`.
+antes de alterar `site/`, `bin/` ou `libs/`.
 
 O contrato de clone limpo, CI e build reproduzível está em
 [`docs/architecture/reproducible-build.md`](docs/architecture/reproducible-build.md).

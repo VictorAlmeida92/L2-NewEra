@@ -9,7 +9,6 @@ legadas.
 ```mermaid
 flowchart LR
     Client[Cliente Interlude]
-    Patch[Hwid/\nmaterial do patch]
     Game[LoginServer + GameServer\nDocker oficial]
     API[game-api\nHTTP interno + HMAC]
     DB[(PostgreSQL)]
@@ -18,7 +17,6 @@ flowchart LR
     Tunnel[bin/cloudflared.exe\ntúnel opcional]
     GUI[Painel Swing legado]
 
-    Patch -. distribuído ao .-> Client
     Client --> Game
     Game --> DB
     Static -. relação não comprovada .-> SiteBin
@@ -35,7 +33,6 @@ flowchart LR
 |---|---|---|---|
 | `bin/` | 145,55 MB em dois executáveis Windows | `ProcessManagerService` do painel Swing | Não |
 | `site/` | 128,07 MB; 14.501 arquivos preexistentes, quase todos imagens, além de HTML/TSX | Nenhum consumidor de filesystem comprovado | Não |
-| `Hwid/` | INI do patch e imagem de referência | Nenhum consumidor no servidor | Não |
 | `libs/` | 125,53 MB de dependências vendorizadas e checksums | Gradle, fat JAR, launchers diretos e extensões | Sim, parcialmente |
 | `tools/` | runtime oficial, SQL legado, rede e scripts one-shot | Desenvolvimento/administração | Somente `tools/runtime/` |
 | `brproject-data/` | exemplos de configuração remanescentes | scripts/painel de preparação legados | Não no Compose |
@@ -60,12 +57,11 @@ Os binários permanecem no caminho atual para não quebrar o painel Swing. Eles
 são opcionais e excluídos do contexto Docker. Seus checksums são protegidos por
 teste, mas isso não substitui assinatura, SBOM ou revisão de licença.
 
-### HWID
+### Client patch e HWID
 
-`Hwid/` pertence ao pacote do cliente. Não deve ser confundido com o código de
-proteção HWID do GameServer. A extração para um repositório do client patch é
-segura do ponto de vista do servidor, mas fica adiada até existir um processo
-de distribuição do cliente.
+O material de patch do cliente foi removido deste repositório. Ele não deve ser
+confundido com o código de proteção HWID do GameServer, que continua em
+`modules/game-server-core/src/main/java/ext/mods/protection/hwid`.
 
 ### Bibliotecas
 
@@ -76,8 +72,9 @@ consumidor tiver uma dependência Gradle ou artefato publicado equivalente.
 ## Regras de dependência
 
 1. Docker oficial pode consumir fonte, `game/`, `login/`, `database/`,
-   `deploy/` e dependências de `libs/`, mas não `bin/`, `site/` ou `Hwid/`.
-2. O núcleo do servidor não pode passar a ler arquivos de `site/` ou `Hwid/`.
+   `deploy/` e dependências de `libs/`, mas não `bin/` ou `site/`.
+2. O núcleo do servidor não pode passar a ler arquivos de `site/` nem material
+   do client patch.
 3. Integrações web passam por `modules/game-api`; acesso direto do site ao JDBC
    não é um contrato suportado.
 4. Novos scripts operacionais entram em `tools/runtime/`.

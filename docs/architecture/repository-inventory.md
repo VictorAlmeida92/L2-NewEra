@@ -24,7 +24,7 @@ flowchart TD
     Root --> Deploy[deploy/docker\nCompose, Dockerfiles e entrypoints]
     Root --> Docs[docs/\narquitetura e banco]
     Root --> Dist[libs/server.jar\nartefato gerado atualmente versionado]
-    Root --> Legacy[bin/ Hwid/ site/\ncomponentes legados ou integrados]
+    Root --> Legacy[bin/ site/\ncomponentes legados ou integrados]
     Root --> Runtime[data/ db/ logs/ cache/\nestado local e runtime]
     Build --> Dist
     Dist --> Login[LoginServer]
@@ -48,7 +48,6 @@ flowchart TD
 | `libs/*.jar` exceto `server.jar` | Bibliotecas vendorizadas e integrações sem artefato Maven equivalente | Dependência vendorizada | Não remover automaticamente; catalogar origem/licença e migrar gradualmente |
 | `data/`, `db/`, `logs/`, caches e WAL/SHM | Bancos locais, logs e estado de execução | Runtime | Não versionar; preservar somente migrations, seeds e fixtures necessárias |
 | `bin/` | `cloudflared.exe` e `site-native.exe` | Ferramenta opcional/legado | Manter temporariamente para a GUI; checksums protegidos e fora do Docker oficial |
-| `Hwid/` | `Capturar.JPG` e configuração do patch do cliente | Material do cliente | Fora do Docker; extrair quando existir repositório de distribuição do client patch |
 | `site/` | Snapshot estático sem build reproduzível completo | Componente web legado | Fora do Docker oficial; integração somente pela Game API |
 | `tools/runtime/` e `StartL2NewEra.*` | Interface operacional Docker | Ferramenta oficial | Manter como contrato canônico de build/start/stop/status/logs |
 | demais scripts `.bat`, `.sh`, `.ps1`, `.vbs`, `.command` | Inicialização direta por JAR e compatibilidade de ambientes | Wrappers legados | Manter enquanto houver consumidores na GUI, Gradle e classes Java; não usar como runtime oficial |
@@ -104,7 +103,7 @@ O contrato reproduzível para remover `libs/server.jar` do índice é:
   Compose.
 - Ignorar toda a pasta `game/data` perderia geodata e configurações necessárias
   ao jogo; a separação precisa ser feita por responsabilidade.
-- Mover `site/`, `bin/` ou `Hwid/` sem busca de referências pode quebrar scripts
+- Mover `site/` ou `bin/` sem busca de referências pode quebrar scripts
   administrativos e o fluxo local.
 - Tratar bibliotecas vendorizadas como lixo pode remover integrações que não são
   substituíveis imediatamente por dependências Maven.

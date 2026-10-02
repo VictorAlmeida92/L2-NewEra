@@ -59,6 +59,57 @@ As seguintes regras valem para mudanças de arquitetura:
 4. O estado de runtime do jogador não deve ser versionado no Git. Banco PostgreSQL, SQLite runtime, WAL/SHM, logs, caches, `hexid.txt` e arquivos gerados pertencem à máquina/ambiente e devem permanecer ignorados.
 5. Documentação de produção deve separar claramente: estado atual local, decisão pretendida, riscos conhecidos e trabalho necessário para implementação.
 
+### Arquitetura-alvo de pastas — Clean Architecture incremental
+
+Esta é a arquitetura futura do L2 NewEra. Ela é uma regra de organização para
+novos componentes e para refatorações graduais; não autoriza mover todo o
+projeto de uma vez nem reescrever o protocolo do jogo.
+
+```text
+L2 NewEra/
+├── modules/                 # código compilável, separado por contexto
+│   └── <contexto>/
+│       └── src/main/
+│           ├── domain/      # entidades, value objects e regras puras
+│           ├── application/ # casos de uso e portas (interfaces)
+│           ├── adapters/    # entrada: packets/API; saída: JDBC/integrações
+│           └── bootstrap/   # composição, configuração e inicialização
+├── database/                # migrations, seeds e fixtures versionáveis
+├── config/                  # defaults e contratos de configuração
+├── deploy/                  # Docker Compose, imagens e deployment
+├── tools/                   # runtime, migração e manutenção operacional
+├── docs/                    # arquitetura, ADRs, contratos e runbooks
+└── runtime/                 # estado local; ignorado e nunca versionado
+```
+
+Fluxo obrigatório para novos casos de uso:
+
+```mermaid
+flowchart LR
+    In[Entrada: packet, comando ou HTTP] --> App[Application / caso de uso]
+    App --> Port[Porta de saída]
+    Port --> Adapter[Adapter JDBC ou integração]
+    Adapter --> DB[(PostgreSQL)]
+    App --> Domain[Domain / regras puras]
+```
+
+Regras da arquitetura-alvo:
+
+1. `domain` não conhece Netty, JDBC, filesystem, Docker ou classes do cliente.
+2. `application` depende de ports/interfaces, nunca de uma implementação JDBC concreta.
+3. `adapters/in` traduz entradas externas para casos de uso; `adapters/out` traduz ports para banco ou serviços externos.
+4. `bootstrap` é o único lugar responsável por montar dependências e iniciar o contexto.
+5. Migrations, seeds e fixtures ficam exclusivamente em `database/`; dados de runtime ficam fora do Git.
+6. `deploy/`, `tools/`, `docs/` e componentes do cliente não podem ser importados pelo domínio do jogo.
+7. Código legado permanece onde está até existir mapa de dependências, teste específico e PR isolado.
+8. Novos módulos devem documentar o contexto, suas entradas, saídas e fronteiras antes da implementação.
+
+Estado atual versus alvo deve ser explícito: os módulos Gradle existentes
+continuam sendo a unidade de build, enquanto a separação `domain`,
+`application`, `adapters` e `bootstrap` será aplicada primeiro a fluxos novos
+ou tocados por uma feature. A validação mínima de cada migração é compilação,
+testes do cenário alterado, build Docker e inicialização do Compose.
+
 ### Constatações de persistência
 
 - O GameServer em execução usa JDBC/Hikari diretamente; no perfil oficial Docker a persistência é PostgreSQL. Não há um segundo banco volátil responsável por fazer batch do estado dos jogadores.
@@ -112,9 +163,9 @@ JAR/GUI até seus consumidores serem isolados.
 
 As fronteiras de componentes opcionais estão documentadas em
 [`docs/architecture/component-boundaries.md`](docs/architecture/component-boundaries.md).
-`bin/`, `site/` e `Hwid/` não pertencem ao runtime Docker oficial. O site deve
-integrar-se pela `game-api`, nunca por JDBC direto; binários opacos exigem
-checksum e revisão explícita; material de client patch não deve ser acoplado ao
+`bin/` e `site/` não pertencem ao runtime Docker oficial. O site deve integrar-se
+pela `game-api`, nunca por JDBC direto; binários opacos exigem checksum e revisão
+explícita; material de client patch pertence ao repositório do cliente, nunca ao
 código do servidor. `checkComponentBoundaries` protege essas regras.
 
 ### Fase 4.1 — normalização estrutural do projeto
@@ -128,7 +179,7 @@ Escopo oficial:
 3. Definir a publicação de artefatos por GitHub Actions, GitHub Releases e/ou registro de imagens Docker, sem usar o Git como armazenamento de binários gerados.
 4. Consolidar migrations, seeds, fixtures e documentação de banco em uma estrutura única, mantendo compatibilidade temporária com os caminhos legados.
 5. Definir um fluxo oficial de inicialização local e de validação, reduzindo a duplicação entre scripts `.bat`, `.sh`, `.ps1`, `.vbs` e `.command`.
-6. Isolar e documentar `Hwid`, `bin`, `site`, `libs` e demais componentes legados antes de mover ou remover qualquer arquivo — concluído em `feature/48-legacy-component-boundaries`.
+6. Isolar e documentar `bin`, `site`, `libs` e demais componentes legados; o material do client patch foi extraído/removido do servidor — concluído em `feature/48-legacy-component-boundaries` e nesta etapa.
 7. Separar documentação mantida manualmente de documentação gerada, logs, caches e estado de runtime.
 8. Registrar os limites entre o servidor, o site e ferramentas administrativas, preparando eventual extração para repositórios independentes sem fazê-la prematuramente — concluído em `feature/48-legacy-component-boundaries`.
 9. Criar validação de clone limpo: build, testes, migrations, Docker Compose, LoginServer, GameServer, login do cliente, criação de personagem e persistência no PostgreSQL — CI automatizada para build e serviços; login de cliente e criação continuam como validação manual.
